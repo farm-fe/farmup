@@ -1,0 +1,53 @@
+{
+  "name": "farmup",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "farm",
+    "start": "farm",
+    "build": "farm build",
+    "preview": "farm preview",
+    "clean": "farm clean",
+    "publish": "pnpm publish",
+    "watch": "farm watch"
+  },
+  "bin": "./dist/index.js",
+  "devDependencies": {
+    "@farmfe/cli": "^1.0.0",
+    "@farmfe/js-plugin-dts": "^0.5.1",
+    "@types/fs-extra": "^11.0.4",
+    "@types/lodash-es": "^4.17.12",
+    "@types/node": "^20.12.7",
+    "@types/tmp": "^0.2.6",
+    "chokidar": "^3.6.0",
+    "execa": "^8.0.1",
+    "typescript": "^5.4.3"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./plugin": {
+      "import": "./dist/plugin.js",
+      "types": "./dist/plugin.d.ts"
+    }
+  },
+  "author": {
+    "name": "shulandmimi",
+    "email": "sshuang141@163.com"
+  },
+  "dependencies": {
+    "@changesets/cli": "^2.27.1",
+    "@farmfe/core": "^1.0.22",
+    "cac": "^6.7.14",
+    "fs-extra": "^11.2.0",
+    "lodash-es": "^4.17.21",
+    "tmp": "^0.2.3"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+    "tabWidth": 4,
+    "endOfLine": "lf",
+    "printWidth": 120,
+    "singleQuote": true,
+    "overrides": [
+        {
+            "files": [
+                "*.json",
+                "*.md"
+            ],
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ]
+}
