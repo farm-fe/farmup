@@ -6,7 +6,7 @@ export default defineConfig({
         presetEnv: false,
         input: {
             index: 'src/index.ts',
-            plugin: 'src/plugin.ts',
+            plugin: 'src/plugin-entry.ts',
         },
         output: {
             targetEnv: 'node',
@@ -15,5 +15,5 @@ export default defineConfig({
         external: ['^@farmfe/core$'],
         minify: false,
     },
-    plugins: [dts()],
+    // plugins: [dts()],
 });

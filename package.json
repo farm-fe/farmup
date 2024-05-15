@@ -11,9 +11,9 @@
     "publish": "pnpm publish",
     "watch": "farm watch"
   },
-  "bin": "./dist/index.js",
+  "bin": "./dist/farmup.js",
   "devDependencies": {
-    "@farmfe/cli": "^1.0.0",
+    "@farmfe/cli": "^1.0.2",
     "@farmfe/js-plugin-dts": "^0.5.1",
     "@types/fs-extra": "^11.0.4",
     "@types/lodash-es": "^4.17.12",
@@ -40,10 +40,12 @@
   },
   "dependencies": {
     "@changesets/cli": "^2.27.1",
-    "@farmfe/core": "^1.0.22",
+    "@farmfe/core": "^1.1.5",
     "cac": "^6.7.14",
     "fs-extra": "^11.2.0",
+    "glob": "^10.3.15",
     "lodash-es": "^4.17.21",
+    "open": "^10.1.0",
     "tmp": "^0.2.3"
   },
   "files": [
