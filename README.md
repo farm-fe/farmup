@@ -27,28 +27,36 @@ pnpm i -g farmup
 
 ## Get Started
 
-watch mode, it's for command
+run js/ts file
 
 ```shell
 farmup index.ts
 ```
 
-start an server, can build and start html entry
+run html file, because `farm` is used, even if it is html, it will automatically compile the referenced js and ts files.
 
 ```shell
-farmup start index.html
+farmup index.html
 ```
 
-build and execute, like `farmup`, but it can only-build
+build and exec, but it can only-build
 
 ```shell
 farmup build index.ts
+
+# only-build
+farmup build index.ts --no-exec
 ```
 
 ## roadmap
 
-- support more file
+- support more entry file
 - more cli options
+  - sourcemap
+  - ignore some watch file
+- command output
+  - start to tmp file
+  - build to local file
 
 ## options
 
