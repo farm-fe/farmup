@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "type": "module",
   "repository": {
-    "url": "https://github.com/shulandmimi/farmup"
+    "url": "https://github.com/farm-fe/farmup"
   },
   "publishConfig": {
     "access": "public"
@@ -14,10 +14,12 @@
     "build": "farm build",
     "preview": "farm preview",
     "clean": "farm clean",
-    "publish": "pnpm publish",
-    "watch": "farm watch"
+    "watch": "farm watch",
+    "release": "pnpm run build && changeset publish"
   },
-  "bin": "./dist/farmup.js",
+  "bin": {
+    "farmup": "./bin/farmup.js"
+  },
   "devDependencies": {
     "@farmfe/cli": "^1.0.2",
     "@farmfe/js-plugin-dts": "^0.5.1",
@@ -56,6 +58,7 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "bin"
   ]
 }
