@@ -5,8 +5,8 @@ import {
     build as farmBuild,
     type JsPlugin,
     getConfigFilePath,
-    FarmCLIOptions,
-    UserConfig,
+    type FarmCLIOptions,
+    type UserConfig,
 } from '@farmfe/core';
 import cac from 'cac';
 import { readFileSync } from 'node:fs';
