@@ -1,5 +1,0 @@
----
-'farmup': patch
----
-
-bump version
