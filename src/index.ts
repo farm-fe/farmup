@@ -7,6 +7,7 @@ import {
     getConfigFilePath,
     type FarmCLIOptions,
     type UserConfig,
+    version as FarmCoreVersion,
 } from '@farmfe/core';
 import cac from 'cac';
 import { readFileSync } from 'node:fs';
@@ -42,7 +43,6 @@ function createInlineConfig(options: CommonOptions): InlineConfig {
 
 async function start(options: CommonOptions) {
     const preNormalizeOption = await NormalizeOption.fromCommonOption(options, logger);
-
     const inlineConfig = createInlineConfig(options);
 
     switch (preNormalizeOption.options.execute.type) {
@@ -77,7 +77,7 @@ const cli = cac('farmup');
 
 cli.option(
     '--target [target]',
-    `target for output, default is node, support 'browser' | 'node' | 'node16' | 'node-legacy' | 'node-next' | 'browser-legacy' | 'browser-es2015' | 'browser-es2017' | 'browser-esnext'`
+    "target for output, default is node, support 'browser' | 'node' | 'node16' | 'node-legacy' | 'node-next' | 'browser-legacy' | 'browser-es2015' | 'browser-es2017' | 'browser-esnext'",
 )
     .option('--mode [mode]', 'mode for build, default is development, choose one from "development" or "production"')
     .option('--minify', 'minify for output')
@@ -101,8 +101,8 @@ async function commonOptionsFromArgs(args: Record<string, any>): Promise<Partial
                 ? args.config
                 : path.resolve(root, args.config)
             : args.config
-            ? await getConfigFilePath(root)
-            : undefined;
+              ? await getConfigFilePath(root)
+              : undefined;
     const execute =
         isString(args.exec) || isString(args.e) ? args.exec || args.e : args.exec === true ? undefined : undefined;
     return {
@@ -138,8 +138,10 @@ cli.command('[entry]', 'start watch for node or custom command').action(async (e
     });
 });
 
-cli.help();
+cli.showHelpOnExit = true;
 
-cli.version(version);
+cli.showVersionOnExit = true;
+
+cli.version(`${version} (core: ${FarmCoreVersion})`);
 
 cli.parse();
