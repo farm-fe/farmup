@@ -86,7 +86,7 @@ cli.option(
     .option('--format [format]', 'choose one from "cjs" or "esm"')
     .option('--external [...external]', 'external')
     .option('--watch [...files]', 'watch files', { default: false })
-    .option('-w [...file]', 'watch files')
+    .option('-w [...file]', 'watch files', { default: false })
     .option('--no-auto-external', 'if not found module, auto as external', { default: true })
     .option('--exec [file]', 'custom execute command')
     .option('-e [file]', 'custom execute command');
@@ -104,6 +104,7 @@ async function commonOptionsFromArgs(args: Record<string, any>): Promise<Partial
               : undefined;
     const execute =
         isString(args.exec) || isString(args.e) ? args.exec || args.e : args.exec === true ? undefined : undefined;
+
     return {
         root,
         target: args.target,
@@ -114,7 +115,7 @@ async function commonOptionsFromArgs(args: Record<string, any>): Promise<Partial
         format: args.format,
         config: configPath,
         minify: args.minify,
-        noWatch: !args.watch,
+        noWatch: args.watch === false && args.w === false,
         noExecute: args.exec === false,
         watchFiles: [args.watch, args.w]
             .flat()
