@@ -2,6 +2,7 @@ import { type ExecaChildProcess, execaCommand } from 'execa';
 import { ExecuteMode, type ExecuteOption, type ResolvedCommonOptions } from './types/options';
 import type { Logger } from '@farmfe/core';
 import { delay } from './util/async';
+import { trimEndLF } from './util/log';
 
 export class Executer {
     child?: ExecaChildProcess;
@@ -39,33 +40,18 @@ export class Executer {
             stdio: 'pipe',
         });
 
-        child.stdout?.on('data', (data) => {
-            logger.debug(data.toString());
-        });
+        child.stdout?.on('data', (data) => logger.debug(trimEndLF(data.toString())));
 
-        child.stderr?.on('data', (err) => {
-            logger.error(err);
-        });
+        child.stderr?.on('data', (err) => logger.error(err));
 
         this.child = child;
 
-        process.on('beforeExit', () => {
-            this.closeChild();
-        });
-        process.on('exit', () => {
-            this.closeChild();
-        });
+        process.on('beforeExit', this.closeChild);
+        process.on('exit', this.closeChild);
 
         child.on('exit', (code) => {
-            if (child) {
-                const message = `"${name}" PID ${child.pid}`;
-                if (code === 0) {
-                    this.logger.info(`${message} done`);
-                } else {
-                    this.logger.info(`${message} killed`);
-                }
-                this.child = undefined;
-            }
+            this.logger.info(`"${name}" PID ${child.pid} ${code === 0 ? 'done' : `exit ${code}`}`);
+            this.child = undefined;
         });
     }
 

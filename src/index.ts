@@ -15,7 +15,7 @@ import autoExecute, { NormalizeOption } from './plugins/auto-execute';
 import { ExecuteMode, type CommonOptions } from './types/options';
 import autoExternal from './plugins/auto-external';
 import path from 'node:path';
-import { isString } from 'lodash-es';
+import { isBoolean, isString } from 'lodash-es';
 
 const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)).toString());
 
@@ -77,7 +77,7 @@ const cli = cac('farmup');
 
 cli.option(
     '--target [target]',
-    "target for output, default is node, support 'browser' | 'node' | 'node16' | 'node-legacy' | 'node-next' | 'browser-legacy' | 'browser-es2015' | 'browser-es2017' | 'browser-esnext'",
+    "target for output, default is node, support 'browser'、'node'、'node16'、'node-legacy'、'node-next'、'browser-legacy'、'browser-es2015'、'browser-es2017'、'browser-esnext'",
 )
     .option('--mode [mode]', 'mode for build, default is development, choose one from "development" or "production"')
     .option('--minify', 'minify for output')
@@ -85,11 +85,9 @@ cli.option(
     .option('--no-config', 'if farm.config.[ext] exists, it will be ignore')
     .option('--format [format]', 'choose one from "cjs" or "esm"')
     .option('--external [...external]', 'external')
-    .option('--watch [...files]', 'watch files', { default: false })
-    .option('-w [...file]', 'watch files', { default: false })
+    .option('-w, --watch [...files]', 'watch files', { default: false })
     .option('--no-auto-external', 'if not found module, auto as external', { default: true })
-    .option('--exec [file]', 'custom execute command')
-    .option('-e [file]', 'custom execute command');
+    .option('-e, --exec [file]', 'custom execute command');
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 async function commonOptionsFromArgs(args: Record<string, any>): Promise<Partial<CommonOptions>> {
@@ -102,8 +100,7 @@ async function commonOptionsFromArgs(args: Record<string, any>): Promise<Partial
             : args.config
               ? await getConfigFilePath(root)
               : undefined;
-    const execute =
-        isString(args.exec) || isString(args.e) ? args.exec || args.e : args.exec === true ? undefined : undefined;
+    const execute = isString(args.exec) && !isBoolean(args.exec) ? args.exec : undefined;
 
     return {
         root,
@@ -111,13 +108,13 @@ async function commonOptionsFromArgs(args: Record<string, any>): Promise<Partial
         args: args['--'],
         mode: args.mode,
         autoExternal: args.autoExternal,
-        execute: execute,
+        execute,
         format: args.format,
         config: configPath,
         minify: args.minify,
-        noWatch: args.watch === false && args.w === false,
+        noWatch: args.watch === false,
         noExecute: args.exec === false,
-        watchFiles: [args.watch, args.w]
+        watchFiles: [args.watch]
             .flat()
             .map((item) => (item === true ? undefined : item))
             .filter(Boolean),
