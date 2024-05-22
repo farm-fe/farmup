@@ -61,6 +61,12 @@ importers:
         specifier: ^5.4.3
         version: 5.4.5
 
+  playground:
+    devDependencies:
+      farmup:
+        specifier: workspace:*
+        version: link:..
+
 packages:
 
   '@babel/code-frame@7.24.2':

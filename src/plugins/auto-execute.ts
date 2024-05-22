@@ -56,7 +56,11 @@ export default function autoExecute(options: CommonOptions = {}): JsPlugin {
                 compiler.addExtraWatchFile(entry, normalize_option.options.watchFiles);
             }
         },
-
+        finish: {
+            async executor() {
+                console.log('执行完了啊');
+            },
+        },
         writeResources: {
             async executor(param) {
                 if (normalize_option.options.noExecute) {
