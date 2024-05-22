@@ -1,5 +1,11 @@
 # farmup
 
+## 0.0.5
+
+### Patch Changes
+
+-   145c5e3: watch short option cannot enable watch mode
+
 ## 0.0.4
 
 ### Patch Changes
