@@ -1,12 +1,16 @@
-import { ExecaChildProcess, execaCommand } from 'execa';
-import { ExecuteMode, ExecuteOption, ResolvedCommonOptions } from './types/options';
-import { Logger } from '@farmfe/core';
+import { type ExecaChildProcess, execaCommand } from 'execa';
+import { ExecuteMode, type ExecuteOption, type ResolvedCommonOptions } from './types/options';
+import type { Logger } from '@farmfe/core';
 import { delay } from './util/async';
 
 export class Executer {
     child?: ExecaChildProcess;
 
-    constructor(public option: ExecuteOption, public logger: Logger, public normalizedOption: ResolvedCommonOptions) {}
+    constructor(
+        public option: ExecuteOption,
+        public logger: Logger,
+        public normalizedOption: ResolvedCommonOptions,
+    ) {}
 
     execute(path: string, name: string, logger = this.logger) {
         switch (this.option.type) {
@@ -26,13 +30,12 @@ export class Executer {
     }
 
     async _execute(command: string, name: string, args: string[], logger: Logger) {
-        if (!this.child) {
+        if (this.child) {
             await this.closeChild();
         }
 
         const child = execaCommand([command, ...args].join(' '), {
             cwd: process.cwd(),
-            // TODO: proxy and use logger
             stdio: 'pipe',
         });
 
@@ -55,10 +58,11 @@ export class Executer {
 
         child.on('exit', (code) => {
             if (child) {
+                const message = `"${name}" PID ${child.pid}`;
                 if (code === 0) {
-                    this.logger.info(`"${name}" PID ${child.pid} done`);
+                    this.logger.info(`${message} done`);
                 } else {
-                    this.logger.info(`"${name}" PID ${child.pid} killed`);
+                    this.logger.info(`${message} killed`);
                 }
                 this.child = undefined;
             }
@@ -68,7 +72,7 @@ export class Executer {
     async closeChild() {
         while (this.child && !this.child.killed) {
             this.child.kill();
-            await delay(300);
+            await delay(50);
         }
         this.child = undefined;
     }
