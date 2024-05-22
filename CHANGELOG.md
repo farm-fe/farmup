@@ -1,5 +1,11 @@
 # farmup
 
+## 0.0.6
+
+### Patch Changes
+
+-   65d0577: 1. short option format 2. format debug info
+
 ## 0.0.5
 
 ### Patch Changes
