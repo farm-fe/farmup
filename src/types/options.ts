@@ -1,14 +1,15 @@
-import { UserConfig } from '@farmfe/core';
+import type { UserConfig } from '@farmfe/core';
 
 export type TargetEnv = Exclude<Required<Required<UserConfig>['compilation']>['output']['targetEnv'], undefined | null>;
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 type Get<T extends Record<keyof any, any>, K extends keyof any> = K extends `${infer PREFIX}.${infer LAST}`
     ? Get<Exclude<T[PREFIX], undefined>, LAST>
     : K extends keyof T
-    ? T[K]
-    : never;
+      ? T[K]
+      : never;
 
-export type Format = Get<UserConfig, 'compilation.output.format'>
+export type Format = Get<UserConfig, 'compilation.output.format'>;
 
 export interface CommonOptions {
     /** entry, if not found, it will be find from default file or directory */
@@ -47,6 +48,8 @@ export interface CommonOptions {
     /** auto external */
     autoExternal?: boolean;
 
+    noWatch?: boolean;
+
     noExecute?: boolean;
 
     root?: string;
@@ -68,13 +71,15 @@ export interface ResolvedCommonOptions {
 
     noExecute: boolean;
 
-    watchFiles: string[]
+    watchFiles: string[];
+
+    noWatch?: boolean;
 }
 
 export enum ExecuteMode {
-    Custom,
-    Node,
-    Browser,
+    Custom = 1,
+    Node = 2,
+    Browser = 3,
 }
 
 interface CustomExecuteOption {

@@ -4,7 +4,7 @@ import {
     ExecuteMode,
     type NodeExecuteOption,
     type ResolvedCommonOptions,
-    TargetEnv,
+    type TargetEnv,
 } from '../../types/options';
 import { tryFindEntryFromUserConfig, tryFindFormatFromPackage } from './find-entry';
 import { isObject, isUndefined, merge, pick } from 'lodash-es';
@@ -132,7 +132,7 @@ export function normalizedTargetEnv(config: UserConfig, commonOptions: CommonOpt
     } else if (config.compilation?.output?.targetEnv) {
         options.target = config.compilation.output.targetEnv;
     } else {
-        let targetFromInput;
+        let targetFromInput: TargetEnv | undefined;
 
         for (const entryFile of Object.values(options.entry)) {
             const ext = path.extname(entryFile).slice(1);
@@ -169,7 +169,7 @@ async function normalizedSimpleConfig(
     config: UserConfig,
     commonOptions: CommonOptions,
     options: ResolvedCommonOptions,
-    logger: Logger
+    logger: Logger,
 ) {
     const inputs = await tryFindEntryFromUserConfig(logger, config, commonOptions);
 
@@ -191,17 +191,18 @@ async function normalizedSimpleConfig(
             ? { target: commonOptions.target || config.compilation?.output?.targetEnv }
             : {}),
         ...(commonOptions.autoExternal ? { autoExternal: !!commonOptions.autoExternal } : {}),
-        noExecute: commonOptions.noExecute || false,
+        noExecute: commonOptions.noExecute ?? false,
+        noWatch: commonOptions.noWatch ?? true,
         watchFiles: await normalizeWatchFiles(commonOptions),
     } as Partial<ResolvedCommonOptions>);
 
     normalizedExecuted(commonOptions, options);
 }
 
-function withServerAndWatch(userConfig: UserConfig, resolvedOption: ResolvedCommonOptions): UserConfig {
+function withServerOrWatch(userConfig: UserConfig, resolvedOption: ResolvedCommonOptions): UserConfig {
     switch (resolvedOption.execute.type) {
         case ExecuteMode.Custom: {
-            merge(userConfig, { compilation: { watch: true }, server: undefined } as UserConfig);
+            merge(userConfig, { compilation: { watch: !resolvedOption.noWatch }, server: undefined } as UserConfig);
             break;
         }
 
@@ -211,9 +212,10 @@ function withServerAndWatch(userConfig: UserConfig, resolvedOption: ResolvedComm
             }
             break;
         }
+
         case ExecuteMode.Node: {
             if (!userConfig.server) {
-                merge(userConfig, { compilation: { watch: true }, server: {} } as UserConfig);
+                merge(userConfig, { compilation: { watch: !resolvedOption.noWatch }, server: {} } as UserConfig);
             }
             break;
         }
@@ -234,12 +236,15 @@ export class NormalizeOption {
         watchFiles: [],
     };
 
-    constructor(private commonOption: CommonOptions, private logger: Logger) {}
+    constructor(
+        private commonOption: CommonOptions,
+        private logger: Logger,
+    ) {}
 
     async config(config: UserConfig): Promise<UserConfig> {
         await normalizedSimpleConfig(config, this.commonOption, this.options, this.logger);
 
-        return withServerAndWatch(
+        return withServerOrWatch(
             {
                 compilation: {
                     input: this.options.entry,
@@ -250,7 +255,7 @@ export class NormalizeOption {
                     ...pick(this.options, 'minify'),
                 },
             },
-            this.options
+            this.options,
         );
     }
 

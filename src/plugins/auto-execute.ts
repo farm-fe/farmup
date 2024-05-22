@@ -2,11 +2,10 @@ import { Logger, type Resource, type JsPlugin } from '@farmfe/core';
 import path from 'node:path';
 import { type CommonOptions, ExecuteMode, type ResolvedCommonOptions } from '../types/options';
 import { NormalizeOption } from '../config/normalize';
-import { autoExternal } from './auto-external';
 import { CLI_NAME, logger } from '../config/constant';
 import { Executer } from '../executer';
 
-export { CLI_NAME, logger, autoExternal, NormalizeOption, Executer };
+export { NormalizeOption, Executer };
 
 function findOutputEntry(resource: Resource[], options: ResolvedCommonOptions) {
     const resourceEntry = resource.find((item) => item.info?.data.isEntry);
@@ -32,7 +31,7 @@ export default function autoExecute(options: CommonOptions = {}): JsPlugin {
     const normalize_option = new NormalizeOption(options, logger);
 
     return {
-        name: `${CLI_NAME}:watcher`,
+        name: `${CLI_NAME}:execute`,
         priority: Number.NEGATIVE_INFINITY,
         async config(config) {
             const normalizedOption = await normalize_option.config(config);
@@ -46,6 +45,11 @@ export default function autoExecute(options: CommonOptions = {}): JsPlugin {
             if (!compiler.config.config?.watch) {
                 return;
             }
+
+            if (options.noWatch) {
+                return;
+            }
+
             const entries = Object.values(compiler.config.config?.input ?? {});
 
             if (entries.length === 0) {
@@ -87,7 +91,7 @@ export default function autoExecute(options: CommonOptions = {}): JsPlugin {
                     resourceEntry.name,
                     new Logger({
                         name: `${CLI_NAME}:${resourceEntry.name}`,
-                    })
+                    }),
                 );
             },
         },
