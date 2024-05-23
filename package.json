@@ -9,12 +9,10 @@
     "access": "public"
   },
   "scripts": {
-    "dev": "farm",
-    "start": "farm",
+    "dev": "farm watch",
     "build": "farm build",
     "preview": "farm preview",
     "clean": "farm clean",
-    "watch": "farm watch",
     "release": "pnpm run build && changeset publish"
   },
   "bin": {
@@ -47,7 +45,7 @@
     "email": "sshuang141@163.com"
   },
   "dependencies": {
-    "@changesets/cli": "^2.27.1",
+    "@changesets/cli": "^2.27.3",
     "@farmfe/core": "^1.1.9",
     "cac": "^6.7.14",
     "fs-extra": "^11.2.0",
