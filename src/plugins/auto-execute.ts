@@ -64,6 +64,7 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
                 compiler.addExtraWatchFile(entry, normalizeOption.options.watchFiles);
             }
         },
+
         writeResources: {
             async executor(param) {
                 if (normalizeOption.options.noExecute) {
@@ -89,14 +90,13 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
                     executer = new Executer(normalizeOption.options.execute, logger, normalizeOption.options);
                 }
 
-                const nameWithoutExt = path.parse(resourceEntry.name).name;
+                const { name: nameWithoutExt } = path.parse(resourceEntry.name);
+                const execLogger = new Logger({ name: `${CLI_NAME}:${nameWithoutExt}` });
 
                 executer.execute(
                     executePath,
                     nameWithoutExt,
-                    new Logger({
-                        name: `${CLI_NAME}:${nameWithoutExt}`,
-                    }),
+                    execLogger,
                 );
             },
         },
