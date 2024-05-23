@@ -64,7 +64,10 @@ farmup build index.ts --no-exec
 
 - `alias`: e
 
-can custom exec, default node
+can custom exec, select the exec method by default through the suffix of the file
+
+- html use server star
+- ts\js use node
 
 ```shell
 farmup index.ts -e node

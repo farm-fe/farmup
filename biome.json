@@ -16,5 +16,10 @@
         "noNonNullAssertion": "off"
       }
     }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
   }
 }

@@ -2,11 +2,10 @@ import { Logger, type Resource, type JsPlugin } from '@farmfe/core';
 import path from 'node:path';
 import { type CommonOptions, ExecuteMode, type ResolvedCommonOptions } from '../types/options';
 import { NormalizeOption } from '../config/normalize';
-import { autoExternal } from './auto-external';
-import { CLI_NAME, logger } from '../config/constant';
+import { CLI_NAME, logger as defaultLogger } from '../config/constant';
 import { Executer } from '../executer';
 
-export { CLI_NAME, logger, autoExternal, NormalizeOption, Executer };
+export { NormalizeOption, Executer };
 
 function findOutputEntry(resource: Resource[], options: ResolvedCommonOptions) {
     const resourceEntry = resource.find((item) => item.info?.data.isEntry);
@@ -25,27 +24,36 @@ function findOutputEntry(resource: Resource[], options: ResolvedCommonOptions) {
     }
 }
 
-export default function autoExecute(options: CommonOptions = {}): JsPlugin {
+export default function autoExecute(options: CommonOptions = {}, logger = defaultLogger): JsPlugin {
     let outputDir: string | undefined = undefined;
     let executer: Executer | null = null;
 
-    const normalize_option = new NormalizeOption(options, logger);
+    const normalizeOption = new NormalizeOption(options, logger);
 
     return {
-        name: `${CLI_NAME}:watcher`,
+        name: `${CLI_NAME}:execute`,
         priority: Number.NEGATIVE_INFINITY,
         async config(config) {
-            const normalizedOption = await normalize_option.config(config);
-            return normalizedOption;
+            return await normalizeOption.config(config);
         },
+
         configResolved(config) {
             outputDir = config.compilation?.output?.path;
+            const format = config.compilation?.output?.format || normalizeOption.options.format;
+            const targetEnv = config.compilation?.output?.targetEnv || normalizeOption.options.target;
+            const entry = Object.values(config.compilation?.input || normalizeOption.options.entry)[0];
+            logger.debug(`[entry: ${entry}] [format: ${format}] [target: ${targetEnv}]`);
         },
 
         configureCompiler(compiler) {
             if (!compiler.config.config?.watch) {
                 return;
             }
+
+            if (options.noWatch) {
+                return;
+            }
+
             const entries = Object.values(compiler.config.config?.input ?? {});
 
             if (entries.length === 0) {
@@ -53,7 +61,7 @@ export default function autoExecute(options: CommonOptions = {}): JsPlugin {
             }
 
             for (const entry of entries) {
-                compiler.addExtraWatchFile(entry, normalize_option.options.watchFiles);
+                compiler.addExtraWatchFile(entry, normalizeOption.options.watchFiles);
             }
         },
         finish: {
@@ -63,7 +71,7 @@ export default function autoExecute(options: CommonOptions = {}): JsPlugin {
         },
         writeResources: {
             async executor(param) {
-                if (normalize_option.options.noExecute) {
+                if (normalizeOption.options.noExecute) {
                     return;
                 }
 
@@ -72,7 +80,7 @@ export default function autoExecute(options: CommonOptions = {}): JsPlugin {
                     return;
                 }
 
-                const resourceEntry = findOutputEntry(Object.values(param.resourcesMap), normalize_option.options);
+                const resourceEntry = findOutputEntry(Object.values(param.resourcesMap), normalizeOption.options);
 
                 if (!resourceEntry) {
                     logger.error('not found output entry');
@@ -80,18 +88,20 @@ export default function autoExecute(options: CommonOptions = {}): JsPlugin {
                 }
 
                 // TODO: multiple entry
-                const execute_path = path.join(outputDir, resourceEntry!.name);
+                const executePath = path.join(outputDir, resourceEntry!.name);
 
                 if (!executer) {
-                    executer = new Executer(normalize_option.options.execute, logger, normalize_option.options);
+                    executer = new Executer(normalizeOption.options.execute, logger, normalizeOption.options);
                 }
 
+                const nameWithoutExt = path.parse(resourceEntry.name).name;
+
                 executer.execute(
-                    execute_path,
-                    resourceEntry.name,
+                    executePath,
+                    nameWithoutExt,
                     new Logger({
-                        name: `${CLI_NAME}:${resourceEntry.name}`,
-                    })
+                        name: `${CLI_NAME}:${nameWithoutExt}`,
+                    }),
                 );
             },
         },

@@ -1,6 +1,6 @@
 {
   "name": "farmup",
-  "version": "0.0.2",
+  "version": "0.0.6",
   "type": "module",
   "repository": {
     "url": "https://github.com/farm-fe/farmup"
@@ -26,7 +26,7 @@
     "@types/tmp": "^0.2.6",
     "chokidar": "^3.6.0",
     "execa": "^8.0.1",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.5"
   },
   "exports": {
     ".": {
@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@changesets/cli": "^2.27.1",
-    "@farmfe/core": "^1.1.5",
+    "@farmfe/core": "^1.1.9",
     "cac": "^6.7.14",
     "farmup": "^0.0.2",
     "fs-extra": "^11.2.0",
