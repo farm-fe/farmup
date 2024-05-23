@@ -1,5 +1,0 @@
----
-'farmup': major
----
-
-optimize code
