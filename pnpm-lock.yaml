@@ -17,6 +17,9 @@ importers:
       cac:
         specifier: ^6.7.14
         version: 6.7.14
+      farmup:
+        specifier: ^0.0.2
+        version: 0.0.2
       fs-extra:
         specifier: ^11.2.0
         version: 11.2.0
@@ -746,6 +749,10 @@ packages:
   external-editor@3.1.0:
     resolution: {integrity: sha512-hMQ4CX1p1izmuLYyZqLMO/qGNw10wSv9QDCPfzXfyFrOaCSSoRfqE1Kf1s5an66J5JZC62NewG+mK49jOCtQew==}
     engines: {node: '>=4'}
+
+  farmup@0.0.2:
+    resolution: {integrity: sha512-+8TKfOnzLWh5g0DcEIBdv6M5OBIz9/LkdRUc3439ncT7ur71hUYjvxkKLHUbGZ01djO9wW0VYVAEWITBSQ1Dqg==}
+    hasBin: true
 
   fast-glob@3.3.2:
     resolution: {integrity: sha512-oX2ruAFQwf/Orj8m737Y5adxDQO0LAB7/S5MnxCdTNDd4p6BsyIVsv9JQsATbTSq8KHRpLwIHbVlUNatxd+1Ow==}
@@ -2829,6 +2836,22 @@ snapshots:
       chardet: 0.7.0
       iconv-lite: 0.4.24
       tmp: 0.0.33
+
+  farmup@0.0.2:
+    dependencies:
+      '@changesets/cli': 2.27.1
+      '@farmfe/core': 1.1.5
+      cac: 6.7.14
+      fs-extra: 11.2.0
+      glob: 10.3.15
+      lodash-es: 4.17.21
+      open: 10.1.0
+      tmp: 0.2.3
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - supports-color
+      - utf-8-validate
 
   fast-glob@3.3.2:
     dependencies:

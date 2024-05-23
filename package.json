@@ -9,12 +9,9 @@
     "access": "public"
   },
   "scripts": {
-    "dev": "farm",
-    "start": "farm",
+    "dev": "farm watch",
     "build": "farm build",
-    "preview": "farm preview",
     "clean": "farm clean",
-    "watch": "farm watch",
     "release": "pnpm run build && changeset publish"
   },
   "bin": {
