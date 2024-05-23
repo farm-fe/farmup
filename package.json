@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "farm watch",
     "build": "farm build",
+    "preview": "farm preview",
     "clean": "farm clean",
     "release": "pnpm run build && changeset publish"
   },
@@ -44,10 +45,9 @@
     "email": "sshuang141@163.com"
   },
   "dependencies": {
-    "@changesets/cli": "^2.27.1",
+    "@changesets/cli": "^2.27.3",
     "@farmfe/core": "^1.1.9",
     "cac": "^6.7.14",
-    "farmup": "^0.0.2",
     "fs-extra": "^11.2.0",
     "glob": "^10.3.15",
     "lodash-es": "^4.17.21",
