@@ -2838,7 +2838,7 @@ snapshots:
   farmup@0.0.2:
     dependencies:
       '@changesets/cli': 2.27.1
-      '@farmfe/core': 1.1.5
+      '@farmfe/core': 1.1.9
       cac: 6.7.14
       fs-extra: 11.2.0
       glob: 10.3.15

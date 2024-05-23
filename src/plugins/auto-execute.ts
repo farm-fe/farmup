@@ -64,11 +64,6 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
                 compiler.addExtraWatchFile(entry, normalizeOption.options.watchFiles);
             }
         },
-        finish: {
-            async executor() {
-                console.log('执行完了啊');
-            },
-        },
         writeResources: {
             async executor(param) {
                 if (normalizeOption.options.noExecute) {
