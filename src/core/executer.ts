@@ -1,8 +1,8 @@
 import { type ExecaChildProcess, execaCommand } from 'execa';
-import { ExecuteMode, type ExecuteOption, type ResolvedCommonOptions } from './types/options';
+import { ExecuteMode, type ExecuteOption, type ResolvedCommonOptions } from '../types/options';
 import type { Logger } from '@farmfe/core';
-import { delay } from './util/async';
-import { trimEndLF } from './util/log';
+import { delay } from '../util/async';
+import { trimEndLF } from '../util/log';
 
 export class Executer {
     child?: ExecaChildProcess;

@@ -55,6 +55,8 @@ export interface CommonOptions {
     root?: string;
 
     watchFiles?: string[];
+
+    name?: string,
 }
 
 export interface ResolvedCommonOptions {
@@ -74,6 +76,11 @@ export interface ResolvedCommonOptions {
     watchFiles: string[];
 
     noWatch?: boolean;
+
+    outputEntry?: {
+        matchEntryName: (name: string, inputs: Record<string, string>) => string | undefined;
+        name: string;
+    };
 }
 
 export enum ExecuteMode {

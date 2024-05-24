@@ -1,8 +1,7 @@
-import { Logger, UserConfig } from '@farmfe/core';
+import type { Logger, UserConfig } from '@farmfe/core';
 import { readFile, stat } from 'fs-extra';
 import path from 'node:path';
-import { CommonOptions, Format, ResolvedCommonOptions } from '../../types/options';
-import { merge } from 'lodash-es';
+import { ExecuteMode, type CommonOptions, type Format, type ResolvedCommonOptions } from '../../types/options';
 import { isExists } from '../../util/file';
 
 const findEntryKeyFromObject = (input: Record<string, string>) => {
@@ -48,7 +47,7 @@ function normalizeCommonEntry(entries: CommonOptions['entry']): ResolvedCommonOp
 
         const [key, ...value] = result;
 
-        let file = value.join(':');
+        const file = value.join(':');
 
         if (!key) {
             throw new Error(`"${entry}" key is empty`);
@@ -62,8 +61,8 @@ function normalizeCommonEntry(entries: CommonOptions['entry']): ResolvedCommonOp
 
     const normalizedEntries: Record<string, string> = {};
 
-    let map: Record<string, number> = {};
-    let sameMap = new Set();
+    const map: Record<string, number> = {};
+    const sameMap = new Set();
     for (const entry of entries ?? []) {
         const result = parseSingleEntry(entry);
 
@@ -72,26 +71,22 @@ function normalizeCommonEntry(entries: CommonOptions['entry']): ResolvedCommonOp
 
         if (sameMap.has(value)) {
             continue;
-        } else {
-            sameMap.add(value);
         }
 
-        const find_uniq_key = (key?: string, suffix = '') => {
-            if (!key) {
-                key = 'index';
-            }
+        sameMap.add(value);
 
-            let newKey = key + suffix;
+        const find_uniq_key = (key?: string, suffix = '') => {
+            const newKey = (key ?? 'index') + suffix;
             if (map[newKey]) {
                 map[newKey]++;
                 return find_uniq_key(key, map[newKey].toString());
-            } else {
-                map[newKey] = 1;
-                return newKey;
             }
+
+            map[newKey] = 1;
+            return newKey;
         };
 
-        let uniq_key = find_uniq_key(key);
+        const uniq_key = find_uniq_key(key);
 
         normalizedEntries[uniq_key] = value;
     }
@@ -100,26 +95,30 @@ function normalizeCommonEntry(entries: CommonOptions['entry']): ResolvedCommonOp
 }
 
 export async function tryFindEntryFromUserConfig(logger: Logger, config: UserConfig, options: CommonOptions) {
-    const entries_from_option = normalizeCommonEntry(options.entry);
+    const entriesFromOption = normalizeCommonEntry(options.entry);
+
+    // cli option > config
+    if (entriesFromOption) {
+        return entriesFromOption;
+    }
 
     let findEntryKey = findEntryKeyFromObject(config.compilation?.input ?? {});
+
+    if (findEntryKey) return config.compilation?.input!;
+
     let findEntry: string | null = null;
 
-    if (!entries_from_option && !findEntryKey) {
-        findEntry = await findDefaultExistsEntry();
-        findEntryKey = 'index';
-        if (!findEntry) {
-            logger.error('entry is not found, please check your entry file', { exit: true });
-            process.exit(1);
-        } else {
-            logger.info(`find and use this entry: "${findEntry}"`);
-        }
-        return {
-            [findEntryKey]: findEntry,
-        };
+    findEntry = await findDefaultExistsEntry();
+    findEntryKey = 'index';
+    if (!findEntry) {
+        logger.error('entry is not found, please check your entry file correct', { exit: true });
+        process.exit(1);
     } else {
-        return merge(entries_from_option, config.compilation?.input ?? {});
+        logger.info(`automatic find and use this entry: "${findEntry}"`);
     }
+    return {
+        [findEntryKey]: findEntry,
+    };
 }
 
 const packageModuleValueMapFormat: Record<string, Format> = {
@@ -140,4 +139,30 @@ export async function tryFindFormatFromPackage(root: string): Promise<Format | u
     }
 
     return undefined;
+}
+
+const formatMapExt: Record<Exclude<Format, undefined>, string> = {
+    cjs: 'js',
+    esm: 'mjs',
+};
+
+export function pinOutputEntryFilename(options: ResolvedCommonOptions) {
+    if (options.noExecute) return;
+
+    const executeMode = options.execute.type;
+
+    function matchEntryName(name: string, inputs: Record<string, string>) {
+        const inputNameKey = name.split('.').slice(0, -1).join('.');
+
+        if (Object.hasOwn(inputs, inputNameKey)) {
+            return name;
+        }
+    }
+
+    if (executeMode === ExecuteMode.Custom || executeMode === ExecuteMode.Node) {
+        options.outputEntry = {
+            matchEntryName,
+            name: `[entryName].${formatMapExt[options.format ?? 'cjs']}`,
+        };
+    }
 }

@@ -6,25 +6,15 @@ import {
     type ResolvedCommonOptions,
     type TargetEnv,
 } from '../../types/options';
-import { tryFindEntryFromUserConfig, tryFindFormatFromPackage } from './find-entry';
+import { pinOutputEntryFilename, tryFindEntryFromUserConfig, tryFindFormatFromPackage } from './find-entry';
 import { isObject, isUndefined, merge, pick } from 'lodash-es';
 import path from 'node:path';
 import { isExists } from '../../util/file';
 import { glob } from 'glob';
 
-function normalizedCompilation(config: UserConfig) {
-    if (!config.compilation) {
-        config.compilation = {};
-    }
-}
-
 function normalizedMinify(config: UserConfig, commonOptions: CommonOptions, options: ResolvedCommonOptions) {
     if (!isUndefined(commonOptions.minify)) {
-        if (!config.compilation) {
-            config.compilation = {};
-        }
-
-        const minify = config.compilation.minify;
+        const minify = config.compilation?.minify;
         if (typeof minify === 'boolean' || (isObject(minify) && minify !== null)) {
             options.minify = commonOptions.minify;
         }
@@ -52,14 +42,14 @@ function normalizedExecuted(commonOption: CommonOptions, options: ResolvedCommon
     const target = commonOption.target;
 
     if (target) {
-        if (target.startsWith('node')) {
-            options.execute = {
-                type: ExecuteMode.Node,
-                args: commonOption.args ?? [],
-            };
-        } else if (target.startsWith('browser')) {
+        if (target.includes('browser')) {
             options.execute = {
                 type: ExecuteMode.Browser,
+                args: commonOption.args ?? [],
+            };
+        } else if (target.includes('node')) {
+            options.execute = {
+                type: ExecuteMode.Node,
                 args: commonOption.args ?? [],
             };
         }
@@ -121,14 +111,18 @@ const extMapTargetEnv: Record<string, TargetEnv> = {
     htm: 'browser',
 };
 
-export function normalizedTargetEnv(config: UserConfig, commonOptions: CommonOptions, options: ResolvedCommonOptions) {
+export function normalizedTargetEnv(
+    config: UserConfig,
+    commonOptions: CommonOptions,
+    options: ResolvedCommonOptions,
+    logger: Logger,
+) {
     config.compilation?.output?.targetEnv;
-    if (commonOptions.target && invalidTargetEnv.includes(commonOptions.target)) {
+    if (commonOptions.target) {
+        if (!invalidTargetEnv.includes(commonOptions.target)) {
+            logger.error(`target ${commonOptions.target}  is invalid`);
+        }
         options.target = commonOptions.target;
-    } else if (commonOptions.target?.startsWith('node')) {
-        options.target = 'node';
-    } else if (commonOptions.target?.startsWith('browser')) {
-        options.target = 'browser';
     } else if (config.compilation?.output?.targetEnv) {
         options.target = config.compilation.output.targetEnv;
     } else {
@@ -151,6 +145,7 @@ export function normalizedTargetEnv(config: UserConfig, commonOptions: CommonOpt
 async function normalizeWatchFiles(commonOptions: CommonOptions) {
     const watchFiles = commonOptions.watchFiles ?? [];
     const result = [];
+
     for (const file of watchFiles) {
         if (await isExists(file)) {
             result.push(file);
@@ -175,10 +170,10 @@ async function normalizedSimpleConfig(
 
     options.entry = inputs;
 
-    normalizedCompilation(config);
+    config.compilation ??= {};
     normalizedMinify(config, commonOptions, options);
     await normalizedFormat(config, commonOptions, options);
-    normalizedTargetEnv(config, commonOptions, options);
+    normalizedTargetEnv(config, commonOptions, options, logger);
 
     merge(options, {
         ...(commonOptions.mode || config.compilation?.mode
@@ -197,6 +192,8 @@ async function normalizedSimpleConfig(
     } as Partial<ResolvedCommonOptions>);
 
     normalizedExecuted(commonOptions, options);
+
+    pinOutputEntryFilename(options);
 }
 
 function withServerOrWatch(userConfig: UserConfig, resolvedOption: ResolvedCommonOptions): UserConfig {
@@ -208,14 +205,14 @@ function withServerOrWatch(userConfig: UserConfig, resolvedOption: ResolvedCommo
 
         case ExecuteMode.Browser: {
             if (!userConfig.server) {
-                merge(userConfig, { server: { port: 12304, cors: true } } as UserConfig);
+                merge(userConfig, { server: { port: 12306, cors: true } } as UserConfig);
             }
             break;
         }
 
         case ExecuteMode.Node: {
             if (!userConfig.server) {
-                merge(userConfig, { compilation: { watch: !resolvedOption.noWatch }, server: {} } as UserConfig);
+                merge(userConfig, { compilation: { watch: !resolvedOption.noWatch }, server: undefined } as UserConfig);
             }
             break;
         }
@@ -243,7 +240,6 @@ export class NormalizeOption {
 
     async config(config: UserConfig): Promise<UserConfig> {
         await normalizedSimpleConfig(config, this.commonOption, this.options, this.logger);
-
         return withServerOrWatch(
             {
                 compilation: {
@@ -251,6 +247,7 @@ export class NormalizeOption {
                     output: {
                         ...pick(this.options, ['format', 'mode']),
                         ...(this.options.target ? { targetEnv: this.options.target } : {}),
+                        ...(this.options.outputEntry ? { entryFilename: this.options.outputEntry.name } : {}),
                     },
                     ...pick(this.options, 'minify'),
                 },

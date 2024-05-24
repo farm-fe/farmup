@@ -1,37 +1,66 @@
-import { Logger, type Resource, type JsPlugin } from '@farmfe/core';
+import { Logger, type JsPlugin } from '@farmfe/core';
 import path from 'node:path';
-import { type CommonOptions, ExecuteMode, type ResolvedCommonOptions } from '../types/options';
+import type { CommonOptions } from '../types/options';
 import { NormalizeOption } from '../config/normalize';
 import { CLI_NAME, logger as defaultLogger } from '../config/constant';
-import { Executer } from '../executer';
+import { Executer } from '../core/executer';
+import { ProxyCompiler } from '../core/proxyCompiler';
 
 export { NormalizeOption, Executer };
 
-function findOutputEntry(resource: Resource[], options: ResolvedCommonOptions) {
-    const resourceEntry = resource.find((item) => item.info?.data.isEntry);
-
-    if (resourceEntry) {
-        return resourceEntry;
-    }
-
-    switch (options.execute.type) {
-        case ExecuteMode.Browser:
-            return resource.find((item) => item.name.endsWith('.html') || item.name.endsWith('.hml'));
-        case ExecuteMode.Node:
-            return resource.find((item) => {
-                return Object.keys(options.entry).find((entry) => new RegExp(`${entry}\\..+$`).test(item.name));
-            });
-    }
-}
-
 export default function autoExecute(options: CommonOptions = {}, logger = defaultLogger): JsPlugin {
+    const name = options.name ?? CLI_NAME;
     let outputDir: string | undefined = undefined;
     let executer: Executer | null = null;
 
     const normalizeOption = new NormalizeOption(options, logger);
 
+    const proxyCompiler = new ProxyCompiler();
+
+    proxyCompiler.onWriteResourcesToDisk(() => {
+        if (normalizeOption.options.noExecute) {
+            return;
+        }
+
+        if (!outputDir) {
+            logger.error('outputDir is not found');
+            return;
+        }
+
+        if (!normalizeOption.options.outputEntry) {
+            return;
+        }
+
+        const resourceOutputEntryFormatter = normalizeOption.options.outputEntry;
+        const resourceOutputEntry = proxyCompiler.resource_names.find((item) =>
+            resourceOutputEntryFormatter.matchEntryName(item, normalizeOption.options.entry)
+        );
+
+        if (!resourceOutputEntry) {
+            logger.error('output entry is not found');
+            return;
+        }
+
+        // TODO: multiple entry
+        const executePath = path.join(outputDir, resourceOutputEntry);
+
+        if (!executer) {
+            executer = new Executer(normalizeOption.options.execute, logger, normalizeOption.options);
+        }
+
+        const nameWithoutExt = path.parse(resourceOutputEntry).name;
+
+        executer.execute(
+            executePath,
+            nameWithoutExt,
+            new Logger({
+                name: `${name}:${nameWithoutExt}`,
+            })
+        );
+    });
+
     return {
-        name: `${CLI_NAME}:execute`,
+        name: `${name}:execute`,
         priority: Number.NEGATIVE_INFINITY,
         async config(config) {
             return await normalizeOption.config(config);
@@ -45,8 +74,10 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
             logger.debug(`[entry: ${entry}] [format: ${format}] [target: ${targetEnv}]`);
         },
 
-        configureCompiler(compiler) {
-            if (!compiler.config.config?.watch) {
+        configureCompiler(c) {
+            proxyCompiler.start(c);
+
+            if (!c.config.config?.watch) {
                 return;
             }
 
@@ -54,51 +85,15 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
                 return;
             }
 
-            const entries = Object.values(compiler.config.config?.input ?? {});
+            const entries = Object.values(c.config.config?.input ?? {});
 
             if (entries.length === 0) {
                 return;
             }
 
             for (const entry of entries) {
-                compiler.addExtraWatchFile(entry, normalizeOption.options.watchFiles);
+                c.addExtraWatchFile(entry, normalizeOption.options.watchFiles);
             }
-        },
-
-        writeResources: {
-            async executor(param) {
-                if (normalizeOption.options.noExecute) {
-                    return;
-                }
-
-                if (!outputDir) {
-                    logger.error('output is not found');
-                    return;
-                }
-
-                const resourceEntry = findOutputEntry(Object.values(param.resourcesMap), normalizeOption.options);
-
-                if (!resourceEntry) {
-                    logger.error('not found output entry');
-                    return;
-                }
-
-                // TODO: multiple entry
-                const executePath = path.join(outputDir, resourceEntry!.name);
-
-                if (!executer) {
-                    executer = new Executer(normalizeOption.options.execute, logger, normalizeOption.options);
-                }
-
-                const { name: nameWithoutExt } = path.parse(resourceEntry.name);
-                const execLogger = new Logger({ name: `${CLI_NAME}:${nameWithoutExt}` });
-
-                executer.execute(
-                    executePath,
-                    nameWithoutExt,
-                    execLogger,
-                );
-            },
         },
     };
 }
