@@ -1,5 +1,4 @@
 import { defineConfig } from '@farmfe/core';
-import dts from '@farmfe/js-plugin-dts';
 
 export default defineConfig({
     compilation: {
@@ -10,10 +9,10 @@ export default defineConfig({
         },
         output: {
             targetEnv: 'node',
+            format: 'esm'
         },
         persistentCache: false,
         external: ['^@farmfe/core$'],
         minify: false,
     },
-    // plugins: [dts()],
 });
