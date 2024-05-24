@@ -3,8 +3,10 @@ import type { Compiler } from '@farmfe/core';
 export function defineProperty<O, K extends keyof O, V extends O[K]>(obj: O, key: K, value: V): V {
     const origin = obj[key];
 
+    const descriptor = Object.getOwnPropertyDescriptor(obj, key);
     Object.defineProperty(obj, key, {
         value,
+        ...descriptor,
     });
 
     return origin as V;
@@ -19,7 +21,7 @@ export function proxyCompilerFn<
     },
     K extends keyof OFT = keyof OFT,
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    F extends (...args: any) => any = OFT[K],
+    F extends (...args: any) => any = OFT[K]
 >(compiler: T, fnName: K, callback: F) {
     const handler = ((...args: Parameters<OFT[K]>) => {
         const r = origin.bind(compiler)(...args);
