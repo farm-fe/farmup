@@ -10,8 +10,10 @@ export class ProxyCompiler {
 
     private lastResources: string[] = [];
     private _preProxyFnList: (keyof Compiler)[] = [];
+    private alreadyProxyFnList: Set<keyof Compiler> = new Set();
 
     start(compiler: Compiler) {
+        const isRestart = !!this.compiler;
         this.compiler = compiler;
 
         if (this._preProxyFnList.length) {
@@ -21,6 +23,15 @@ export class ProxyCompiler {
 
             this._preProxyFnList = [];
         }
+
+        if (isRestart) {
+            const proxyFnList = this.alreadyProxyFnList;
+            this.alreadyProxyFnList = new Set();
+            for (const fnName of proxyFnList) {
+                this.proxyCompiler(fnName);
+            }
+        }
+
         this.on('resources', (r) => {
             this.lastResources = Object.keys(r.result);
         });
@@ -30,11 +41,18 @@ export class ProxyCompiler {
         return this.lastResources;
     }
 
-    proxyCompiler<K extends keyof Compiler>(fnName: K) {
+    private proxyCompiler<K extends keyof Compiler>(fnName: K) {
         if (!this.compiler) {
             this._preProxyFnList.push(fnName);
             return;
         }
+
+        if (this.alreadyProxyFnList.has(fnName)) {
+            return;
+        }
+
+        this.alreadyProxyFnList.add(fnName);
+
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         proxyCompilerFn(this.compiler, fnName, (...args: any[]) => this.event.emit(fnName, ...args));
     }
@@ -46,7 +64,7 @@ export class ProxyCompiler {
         OFT extends Record<keyof T, (...args: any) => any> = {
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
             [KK in keyof T]: T[KK] extends (...args: any[]) => any ? T[KK] : never;
-        },
+        }
     >(fnName: K, fn: (context: FnContext<Parameters<OFT[K]>, ReturnType<OFT[K]>>) => void) {
         this.proxyCompiler(fnName as keyof Compiler);
         this.event.on(fnName.toString(), fn);
