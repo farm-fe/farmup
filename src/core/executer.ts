@@ -50,7 +50,7 @@ export class Executer {
         process.on('exit', this.closeChild);
 
         child.on('exit', (code) => {
-            this.logger.info(`"${name}" PID ${child.pid} ${code === 0 ? 'done' : `exit ${code}`}`);
+            code && this.logger.info(`"${name}" PID ${child.pid} ${code === 0 ? 'done' : `exit ${code}`}`);
             this.child = undefined;
         });
     }
