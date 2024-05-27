@@ -1,5 +1,11 @@
 # farmup
 
+## 0.0.8
+
+### Patch Changes
+
+- 4343d29: Optimize the situation when code is null
+
 ## 0.0.7
 
 ### Patch Changes
