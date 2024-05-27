@@ -1,5 +1,5 @@
 <h1 align="center">
-Farm
+Farmup
 </h1>
 
 <p align="center">easy run your TypeScript、JavaScript or html</p>

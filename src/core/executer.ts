@@ -11,7 +11,7 @@ export class Executer {
         public option: ExecuteOption,
         public logger: Logger,
         public normalizedOption: ResolvedCommonOptions,
-    ) {}
+    ) { }
 
     execute(path: string, name: string, logger = this.logger) {
         switch (this.option.type) {
@@ -50,7 +50,7 @@ export class Executer {
         process.on('exit', this.closeChild);
 
         child.on('exit', (code) => {
-            this.logger.info(`"${name}" PID ${child.pid} ${code === 0 ? 'done' : `exit ${code}`}`);
+            this.logger.info(`"${name}" PID ${child.pid} ${!code ? 'done' : `exit ${code}`}`);
             this.child = undefined;
         });
     }
