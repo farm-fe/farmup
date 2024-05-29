@@ -1,5 +1,11 @@
 # farmup
 
+## 0.0.9
+
+### Patch Changes
+
+- 8e76286: upgrade dependence & option sort & add output option
+
 ## 0.0.8
 
 ### Patch Changes
