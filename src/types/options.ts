@@ -6,8 +6,8 @@ export type TargetEnv = Exclude<Required<Required<UserConfig>['compilation']>['o
 type Get<T extends Record<keyof any, any>, K extends keyof any> = K extends `${infer PREFIX}.${infer LAST}`
     ? Get<Exclude<T[PREFIX], undefined>, LAST>
     : K extends keyof T
-      ? T[K]
-      : never;
+    ? T[K]
+    : never;
 
 export type Format = Get<UserConfig, 'compilation.output.format'>;
 
@@ -54,9 +54,15 @@ export interface CommonOptions {
 
     root?: string;
 
+    /** watch files, support glob pattern */
     watchFiles?: string[];
-
-    name?: string,
+    /** name for plugin or logger prefix */
+    name?: string;
+    /**
+     * output directory for build
+     * @default './dist'
+     */
+    outputDir?: string;
 }
 
 export interface ResolvedCommonOptions {
@@ -81,6 +87,11 @@ export interface ResolvedCommonOptions {
         matchEntryName: (name: string, inputs: Record<string, string>) => string | undefined;
         name: string;
     };
+
+    /**
+     * @default './dist'
+     */
+    outputDir: string;
 }
 
 export enum ExecuteMode {

@@ -12,6 +12,7 @@ feature
 
 - cross import CommonJs and EsModule
 - watch mode
+- support html
 
 ## Setup
 
@@ -54,9 +55,7 @@ farmup build index.ts --no-exec
 - more cli options
   - sourcemap
   - ignore some watch file
-- command output
-  - start to tmp file
-  - build to local file
+- execute without output file
 
 ## options
 
