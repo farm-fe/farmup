@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@changesets/cli": "^2.27.3",
-    "@farmfe/core": "^1.1.9",
+    "@farmfe/core": "^1.1.12",
     "cac": "^6.7.14",
     "fs-extra": "^11.2.0",
     "glob": "^10.3.15",
