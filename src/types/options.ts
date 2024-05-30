@@ -63,6 +63,11 @@ export interface CommonOptions {
      * @default './dist'
      */
     outputDir?: string;
+    /**
+     * generate sourcemap
+     * @default false
+     */
+    sourcemap?: boolean;
 }
 
 export interface ResolvedCommonOptions {
@@ -92,6 +97,11 @@ export interface ResolvedCommonOptions {
      * @default './dist'
      */
     outputDir: string;
+    /**
+     * generate sourcemap
+     * @default false
+     */
+    sourcemap?: boolean;
 }
 
 export enum ExecuteMode {

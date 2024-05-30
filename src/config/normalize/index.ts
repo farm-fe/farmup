@@ -190,6 +190,7 @@ async function normalizedSimpleConfig(
         noExecute: commonOptions.noExecute ?? false,
         noWatch: commonOptions.noWatch ?? true,
         watchFiles: await normalizeWatchFiles(commonOptions),
+        sourcemap: commonOptions.sourcemap ?? false,
     } as Partial<ResolvedCommonOptions>);
 
     normalizedExecuted(commonOptions, options);
@@ -233,6 +234,7 @@ export class NormalizeOption {
         noExecute: false,
         watchFiles: [],
         outputDir: './dist',
+        sourcemap: false,
     };
 
     constructor(private commonOption: CommonOptions, private logger: Logger) {}
@@ -249,6 +251,7 @@ export class NormalizeOption {
                         ...(this.options.outputEntry ? { entryFilename: this.options.outputEntry.name } : {}),
                         path: this.options.outputDir,
                     },
+                    ...pick(this.options, 'sourcemap'),
                     ...pick(this.options, 'minify'),
                 },
             },

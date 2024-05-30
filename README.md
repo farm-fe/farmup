@@ -117,3 +117,9 @@ set external package or path
 - `default`: `true`
 
 in your code, if not find `package` or `source`, set external
+
+### sourcemap
+
+- `default`: `false`
+
+generate sourcemap
