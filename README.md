@@ -120,6 +120,6 @@ in your code, if not find `package` or `source`, set external
 
 ### sourcemap
 
-- `default`: `false`
+- `default`: `undefined`
 
 generate sourcemap

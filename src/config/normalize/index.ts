@@ -179,6 +179,9 @@ async function normalizedSimpleConfig(
         ...(commonOptions.mode || config.compilation?.mode
             ? { mode: commonOptions.mode || config.compilation?.mode }
             : {}),
+        ...(commonOptions.sourcemap || config.compilation?.sourcemap
+            ? { sourcemap: commonOptions.sourcemap || config.compilation?.sourcemap }
+            : {}),
         ...(commonOptions.format || config.compilation?.output?.format
             ? { format: commonOptions.format || config.compilation?.output?.format }
             : {}),
@@ -190,7 +193,6 @@ async function normalizedSimpleConfig(
         noExecute: commonOptions.noExecute ?? false,
         noWatch: commonOptions.noWatch ?? true,
         watchFiles: await normalizeWatchFiles(commonOptions),
-        sourcemap: commonOptions.sourcemap ?? false,
     } as Partial<ResolvedCommonOptions>);
 
     normalizedExecuted(commonOptions, options);
@@ -234,10 +236,10 @@ export class NormalizeOption {
         noExecute: false,
         watchFiles: [],
         outputDir: './dist',
-        sourcemap: false,
+        sourcemap: undefined,
     };
 
-    constructor(private commonOption: CommonOptions, private logger: Logger) {}
+    constructor(private commonOption: CommonOptions, private logger: Logger) { }
 
     async config(config: UserConfig): Promise<UserConfig> {
         await normalizedSimpleConfig(config, this.commonOption, this.options, this.logger);
