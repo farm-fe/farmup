@@ -121,5 +121,6 @@ in your code, if not find `package` or `source`, set external
 ### sourcemap
 
 - `default`: `undefined`
+- option:  `boolean` | `'inline'` | `'all'` | `'all-inline'`
 
 generate sourcemap

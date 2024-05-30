@@ -87,7 +87,7 @@ cli.option('-w, --watch [...files]', 'watch files', { default: false })
     .option('--format [format]', 'choose one from "cjs" or "esm"')
     .option('--external [...external]', 'external')
     .option('--no-auto-external', 'if not found module, auto as external', { default: true })
-    .option('--sourcemap', 'generate sourcemap or not', { default: undefined })
+    .option('--sourcemap', 'generate sourcemap or not')
     .option(
         '--target [target]',
         "target for output, default is node, support 'browser'、'node'、'node16'、'node-legacy'、'node-next'、'browser-legacy'、'browser-es2015'、'browser-es2017'、'browser-esnext'"
