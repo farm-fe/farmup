@@ -179,8 +179,8 @@ async function normalizedSimpleConfig(
         ...(commonOptions.mode || config.compilation?.mode
             ? { mode: commonOptions.mode || config.compilation?.mode }
             : {}),
-        ...(commonOptions.sourcemap || config.compilation?.sourcemap
-            ? { sourcemap: commonOptions.sourcemap || config.compilation?.sourcemap }
+        ...(commonOptions.sourcemap ?? config.compilation?.sourcemap
+            ? { sourcemap: commonOptions.sourcemap ?? config.compilation?.sourcemap }
             : {}),
         ...(commonOptions.format || config.compilation?.output?.format
             ? { format: commonOptions.format || config.compilation?.output?.format }
@@ -253,8 +253,7 @@ export class NormalizeOption {
                         ...(this.options.outputEntry ? { entryFilename: this.options.outputEntry.name } : {}),
                         path: this.options.outputDir,
                     },
-                    ...pick(this.options, 'sourcemap'),
-                    ...pick(this.options, 'minify'),
+                    ...pick(this.options, 'minify', 'sourcemap'),
                 },
             },
             this.options
