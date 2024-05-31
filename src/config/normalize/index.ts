@@ -160,6 +160,11 @@ async function normalizeWatchFiles(commonOptions: CommonOptions) {
     return result;
 }
 
+const organizeSourcemap = (sourcemap: boolean | 'true' | 'false' | 'inline' | 'all' | 'all-inline' | undefined):
+    boolean | 'inline' | 'all' | 'all-inline' | undefined => {
+    return sourcemap === 'false' ? false : sourcemap === 'true' ? true : sourcemap;
+}
+
 async function normalizedSimpleConfig(
     config: UserConfig,
     commonOptions: CommonOptions,
@@ -180,7 +185,7 @@ async function normalizedSimpleConfig(
             ? { mode: commonOptions.mode || config.compilation?.mode }
             : {}),
         ...(commonOptions.sourcemap ?? config.compilation?.sourcemap
-            ? { sourcemap: commonOptions.sourcemap ?? config.compilation?.sourcemap }
+            ? { sourcemap: organizeSourcemap(commonOptions.sourcemap ?? config.compilation?.sourcemap) }
             : {}),
         ...(commonOptions.format || config.compilation?.output?.format
             ? { format: commonOptions.format || config.compilation?.output?.format }
