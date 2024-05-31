@@ -1,3 +1,4 @@
 {
-    "ignoreWords": ["farmfe", "farmup", "execa", "shulandmimi"]
+    "ignoreWords": ["farmfe", "farmup", "execa", "shulandmimi", "biomejs"],
+    "ignorePaths": ["./pnpm-lock.yaml", "LICENSE", "CHANGELOG.md"]
 }
