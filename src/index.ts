@@ -102,8 +102,8 @@ async function commonOptionsFromArgs(args: Record<string, any>): Promise<Partial
                 ? args.config
                 : path.resolve(root, args.config)
             : args.config
-            ? await getConfigFilePath(root)
-            : undefined;
+                ? await getConfigFilePath(root)
+                : undefined;
     const execute = isString(args.exec) && !isBoolean(args.exec) ? args.exec : undefined;
 
     return {
@@ -123,7 +123,7 @@ async function commonOptionsFromArgs(args: Record<string, any>): Promise<Partial
             .map((item) => (item === true ? undefined : item))
             .filter(Boolean),
         outputDir: args.output || './dist',
-        sourcemap: args.sourcemap,
+        sourcemap: args.sourcemap === 'false' ? false : args.sourcemap === 'true' ? true : args.sourcemap,
     };
 }
 
