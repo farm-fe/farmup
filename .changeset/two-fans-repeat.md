@@ -1,0 +1,5 @@
+---
+'farmup': patch
+---
+
+support `--sourcemap`

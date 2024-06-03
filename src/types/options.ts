@@ -63,6 +63,11 @@ export interface CommonOptions {
      * @default './dist'
      */
     outputDir?: string;
+    /**
+     * generate sourcemap
+     * @params boolean | 'inline' | 'all' | 'all-inline'
+     */
+    sourcemap?: boolean | 'inline' | 'all' | 'all-inline'
 }
 
 export interface ResolvedCommonOptions {
@@ -92,6 +97,11 @@ export interface ResolvedCommonOptions {
      * @default './dist'
      */
     outputDir: string;
+    /**
+     * generate sourcemap
+     * @params boolean | 'inline' | 'all' | 'all-inline'
+     */
+    sourcemap?: boolean  | 'inline' | 'all' | 'all-inline'
 }
 
 export enum ExecuteMode {

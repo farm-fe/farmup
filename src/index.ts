@@ -87,6 +87,7 @@ cli.option('-w, --watch [...files]', 'watch files', { default: false })
     .option('--format [format]', 'choose one from "cjs" or "esm"')
     .option('--external [...external]', 'external')
     .option('--no-auto-external', 'if not found module, auto as external', { default: true })
+    .option('--sourcemap [sourcemap]', 'generate sourcemap or not')
     .option(
         '--target [target]',
         "target for output, default is node, support 'browser'、'node'、'node16'、'node-legacy'、'node-next'、'browser-legacy'、'browser-es2015'、'browser-es2017'、'browser-esnext'"
@@ -101,8 +102,8 @@ async function commonOptionsFromArgs(args: Record<string, any>): Promise<Partial
                 ? args.config
                 : path.resolve(root, args.config)
             : args.config
-            ? await getConfigFilePath(root)
-            : undefined;
+                ? await getConfigFilePath(root)
+                : undefined;
     const execute = isString(args.exec) && !isBoolean(args.exec) ? args.exec : undefined;
 
     return {
@@ -122,6 +123,7 @@ async function commonOptionsFromArgs(args: Record<string, any>): Promise<Partial
             .map((item) => (item === true ? undefined : item))
             .filter(Boolean),
         outputDir: args.output || './dist',
+        sourcemap: args.sourcemap === 'false' ? false : args.sourcemap === 'true' ? true : args.sourcemap,
     };
 }
 
