@@ -1,5 +1,11 @@
 # farmup
 
+## 0.0.10
+
+### Patch Changes
+
+- 4101294: support `--sourcemap`
+
 ## 0.0.9
 
 ### Patch Changes
