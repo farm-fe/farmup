@@ -179,8 +179,8 @@ async function normalizedSimpleConfig(
         ...(commonOptions.mode || config.compilation?.mode
             ? { mode: commonOptions.mode || config.compilation?.mode }
             : {}),
-        ...(commonOptions.sourcemap ?? config.compilation?.sourcemap
-            ? { sourcemap: organizeSourcemap(commonOptions.sourcemap ?? config.compilation?.sourcemap) }
+        ...(!isUndefined(commonOptions.sourcemap ?? config.compilation?.sourcemap)
+            ? { sourcemap: commonOptions.sourcemap ?? config.compilation?.sourcemap }
             : {}),
         ...(commonOptions.format || config.compilation?.output?.format
             ? { format: commonOptions.format || config.compilation?.output?.format }
