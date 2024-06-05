@@ -10,6 +10,7 @@ type Get<T extends Record<keyof any, any>, K extends keyof any> = K extends `${i
     : never;
 
 export type Format = Get<UserConfig, 'compilation.output.format'>;
+export type SourceMap = Get<UserConfig, 'compilation.sourcemap'>;
 
 export interface CommonOptions {
     /** entry, if not found, it will be find from default file or directory */
@@ -67,7 +68,7 @@ export interface CommonOptions {
      * generate sourcemap
      * @params boolean | 'inline' | 'all' | 'all-inline'
      */
-    sourcemap?: boolean | 'inline' | 'all' | 'all-inline'
+    sourcemap?: SourceMap;
 }
 
 export interface ResolvedCommonOptions {
@@ -101,7 +102,7 @@ export interface ResolvedCommonOptions {
      * generate sourcemap
      * @params boolean | 'inline' | 'all' | 'all-inline'
      */
-    sourcemap?: boolean  | 'inline' | 'all' | 'all-inline'
+    sourcemap?: SourceMap;
 }
 
 export enum ExecuteMode {

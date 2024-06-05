@@ -115,7 +115,7 @@ export function normalizedTargetEnv(
     config: UserConfig,
     commonOptions: CommonOptions,
     options: ResolvedCommonOptions,
-    logger: Logger
+    logger: Logger,
 ) {
     config.compilation?.output?.targetEnv;
     if (commonOptions.target) {
@@ -164,7 +164,7 @@ async function normalizedSimpleConfig(
     config: UserConfig,
     commonOptions: CommonOptions,
     options: ResolvedCommonOptions,
-    logger: Logger
+    logger: Logger,
 ) {
     const inputs = await tryFindEntryFromUserConfig(logger, config, commonOptions);
 
@@ -189,6 +189,7 @@ async function normalizedSimpleConfig(
             ? { target: commonOptions.target || config.compilation?.output?.targetEnv }
             : {}),
         ...(commonOptions.autoExternal ? { autoExternal: !!commonOptions.autoExternal } : {}),
+        external: commonOptions.external,
         outputDir: commonOptions.outputDir ?? config.compilation.output?.path ?? './dist',
         noExecute: commonOptions.noExecute ?? false,
         noWatch: commonOptions.noWatch ?? true,
@@ -239,7 +240,10 @@ export class NormalizeOption {
         sourcemap: undefined,
     };
 
-    constructor(private commonOption: CommonOptions, private logger: Logger) { }
+    constructor(
+        private commonOption: CommonOptions,
+        private logger: Logger,
+    ) {}
 
     async config(config: UserConfig): Promise<UserConfig> {
         await normalizedSimpleConfig(config, this.commonOption, this.options, this.logger);
@@ -253,10 +257,10 @@ export class NormalizeOption {
                         ...(this.options.outputEntry ? { entryFilename: this.options.outputEntry.name } : {}),
                         path: this.options.outputDir,
                     },
-                    ...pick(this.options, 'minify', 'sourcemap'),
+                    ...pick(this.options, 'minify', 'sourcemap', 'external'),
                 },
             },
-            this.options
+            this.options,
         );
     }
 

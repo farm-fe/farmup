@@ -33,7 +33,7 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
 
         const resourceOutputEntryFormatter = normalizeOption.options.outputEntry;
         const resourceOutputEntry = proxyCompiler.resource_names.find((item) =>
-            resourceOutputEntryFormatter.matchEntryName(item, normalizeOption.options.entry)
+            resourceOutputEntryFormatter.matchEntryName(item, normalizeOption.options.entry),
         );
 
         if (!resourceOutputEntry) {
@@ -55,7 +55,7 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
             nameWithoutExt,
             new Logger({
                 name: `${name}:${nameWithoutExt}`,
-            })
+            }),
         );
     });
 
