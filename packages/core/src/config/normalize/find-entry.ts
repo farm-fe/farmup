@@ -151,18 +151,19 @@ export function pinOutputEntryFilename(options: ResolvedCommonOptions) {
 
     const executeMode = options.execute.type;
 
-    function matchEntryName(name: string, inputs: Record<string, string>) {
-        const inputNameKey = name.split('.').slice(0, -1).join('.');
 
-        if (Object.hasOwn(inputs, inputNameKey)) {
-            return name;
-        }
+    if(options.target?.startsWith('browser')) {
+        return;
     }
 
-    if (executeMode === ExecuteMode.Custom || executeMode === ExecuteMode.Node) {
+    if ((executeMode === ExecuteMode.Custom || executeMode === ExecuteMode.Node) && !options.noExecute) {
+        options.entry = Object.entries(options.entry).reduce((res, [key, val]) => {
+            res[`${key}.${formatMapExt[options.format ?? 'cjs']}`] = val;
+            return res;
+        }, {} as Record<string, string>);
+
         options.outputEntry = {
-            matchEntryName,
-            name: `[entryName].${formatMapExt[options.format ?? 'cjs']}`,
+            name: '[entryName]'
         };
     }
 }

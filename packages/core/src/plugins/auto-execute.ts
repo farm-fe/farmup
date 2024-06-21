@@ -31,17 +31,13 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
             return;
         }
 
-        const resourceOutputEntryFormatter = normalizeOption.options.outputEntry;
-        const resourceOutputEntry = proxyCompiler.resource_names.find((item) =>
-            resourceOutputEntryFormatter.matchEntryName(item, normalizeOption.options.entry),
-        );
+        const resourceOutputEntry = Object.keys(normalizeOption.options.entry)[0];
 
         if (!resourceOutputEntry) {
             logger.error('output entry is not found');
             return;
         }
 
-        // TODO: multiple entry
         const executePath = path.join(outputDir, resourceOutputEntry);
 
         if (!executer) {

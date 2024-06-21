@@ -46,6 +46,7 @@ function createInlineConfig(options: CommonOptions): InlineConfig {
 async function autoStart(options: CommonOptions) {
     const preNormalizeOption = await NormalizeOption.fromCommonOption(options, new NoopLogger());
     const inlineConfig = createInlineConfig(options);
+    // console.log(preNormalizeOption.options);
     switch (preNormalizeOption.options.execute.type) {
         case ExecuteMode.Browser:
             return farmStart(inlineConfig);

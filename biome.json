@@ -15,7 +15,10 @@
       "style": {
         "noNonNullAssertion": "off"
       }
-    }
+    },
+    "ignore": [
+      "dist"
+    ]
   },
   "javascript": {
     "formatter": {

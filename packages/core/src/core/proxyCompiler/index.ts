@@ -8,7 +8,6 @@ export class ProxyCompiler {
 
     private event: EventEmitter = new EventEmitter();
 
-    private lastResources: string[] = [];
     private _preProxyFnList: (keyof Compiler)[] = [];
     private alreadyProxyFnList: Set<keyof Compiler> = new Set();
 
@@ -31,14 +30,6 @@ export class ProxyCompiler {
                 this.proxyCompiler(fnName);
             }
         }
-
-        this.on('resources', (r) => {
-            this.lastResources = Object.keys(r.result);
-        });
-    }
-
-    get resource_names() {
-        return this.lastResources;
     }
 
     private proxyCompiler<K extends keyof Compiler>(fnName: K) {
@@ -64,7 +55,7 @@ export class ProxyCompiler {
         OFT extends Record<keyof T, (...args: any) => any> = {
             // biome-ignore lint/suspicious/noExplicitAny: <explanation>
             [KK in keyof T]: T[KK] extends (...args: any[]) => any ? T[KK] : never;
-        }
+        },
     >(fnName: K, fn: (context: FnContext<Parameters<OFT[K]>, ReturnType<OFT[K]>>) => void) {
         this.proxyCompiler(fnName as keyof Compiler);
         this.event.on(fnName.toString(), fn);

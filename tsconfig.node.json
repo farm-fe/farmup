@@ -8,5 +8,5 @@
     "allowSyntheticDefaultImports": true,
     "strict": true
   },
-  "include": ["farm.config.ts"]
+  "include": ["packages/core/farm.config.ts"]
 }

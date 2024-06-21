@@ -90,7 +90,6 @@ export interface ResolvedCommonOptions {
     noWatch?: boolean;
 
     outputEntry?: {
-        matchEntryName: (name: string, inputs: Record<string, string>) => string | undefined;
         name: string;
     };
 
