@@ -5,6 +5,9 @@
   "repository": {
     "url": "https://github.com/farm-fe/farmup"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "farm watch",
     "build": "farm build",
