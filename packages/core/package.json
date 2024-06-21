@@ -1,0 +1,58 @@
+{
+  "name": "farmup",
+  "version": "0.0.11",
+  "type": "module",
+  "repository": {
+    "url": "https://github.com/farm-fe/farmup"
+  },
+  "scripts": {
+    "dev": "farm watch",
+    "build": "farm build",
+    "preview": "farm preview",
+    "clean": "farm clean",
+    "farmup": "node ./bin/farmup.js --no-exec -w"
+  },
+  "bin": "./bin/farmup.js",
+  "devDependencies": {
+    "@farmfe/cli": "^1.0.2",
+    "@types/fs-extra": "^11.0.4",
+    "@types/lodash-es": "^4.17.12",
+    "@types/node": "^20.12.7",
+    "typescript": "^5.4.5",
+    "cac": "^6.7.14",
+    "execa": "^8.0.1",
+    "fs-extra": "^11.2.0",
+    "glob": "^10.3.15",
+    "lodash-es": "^4.17.21"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./plugin": {
+      "import": "./dist/plugin.js",
+      "types": "./dist/plugin.d.ts"
+    }
+  },
+  "keywords": [
+    "farm",
+    "cli",
+    "execute",
+    "exec",
+    "typescript",
+    "html",
+    "javascript",
+    "ts",
+    "js",
+    "builder"
+  ],
+  "author": {
+    "name": "shulandmimi",
+    "email": "sshuang141@163.com"
+  },
+  "dependencies": {
+    "@farmfe/core": "^1.2.0"
+  }
+}

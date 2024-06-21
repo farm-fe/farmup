@@ -9,10 +9,11 @@ export default defineConfig({
         },
         output: {
             targetEnv: 'node',
-            format: 'esm'
+            format: 'esm',
         },
         persistentCache: false,
         external: ['^@farmfe/core$'],
         minify: false,
+        treeShaking: true,
     },
 });
