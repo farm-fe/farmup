@@ -31,6 +31,7 @@ export class Executer {
     }
 
     async _execute(command: string, name: string, args: string[], logger: Logger) {
+
         if (this.child) {
             await this.closeChild();
         }
@@ -40,26 +41,52 @@ export class Executer {
             stdio: 'pipe',
         });
 
-        child.stdout?.on('data', (data) => logger.debug(trimEndLF(data.toString())));
+        const onStdoutData = (data: Buffer) => logger.debug(trimEndLF(data.toString()));
+        const onStderrData = (err: Error) => logger.error(err);
 
-        child.stderr?.on('data', (err) => logger.error(err));
+        child.stdout?.on('data', onStdoutData);
+        child.stderr?.on('data', onStderrData);
 
         this.child = child;
 
-        process.on('beforeExit', this.closeChild);
-        process.on('exit', this.closeChild);
+
+        const onBeforeExit = () => this.closeChild();
+        process.on('beforeExit', onBeforeExit);
+        process.on('exit', onBeforeExit);
 
         child.on('exit', (code) => {
             this.logger.info(`"${name}" PID ${child.pid} ${!code ? 'done' : `exit ${code}`}`);
             this.child = undefined;
+
+            child.stdout?.off('data', onStdoutData);
+            child.stderr?.off('data', onStderrData);
+            process.off('beforeExit', onBeforeExit);
+            process.off('exit', onBeforeExit);
         });
     }
 
     async closeChild() {
-        while (this.child && !this.child.killed) {
+        const maxRetries = 10;
+        let retries = 0;
+
+        while (this.child && !this.child.killed && retries < maxRetries) {
             this.child.kill();
             await delay(50);
+            retries++;
         }
+
+        if (this.child && !this.child.killed) {
+            this.logger.warn(`Child process PID ${this.child.pid} failed to close after ${maxRetries} attempts`);
+        }
+
+        await new Promise<void>((resolve) => {
+            this.child.on('exit', () => {
+                console.log('exit');
+
+                resolve();
+            });
+        });
+
         this.child = undefined;
     }
 }
