@@ -5,6 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "pnpm --filter './packages/core' run dev",
     "release": "pnpm --filter './packages/*' run build && changeset publish",
     "ready": "farmup ./scripts/ready.ts -o ./dist/ready --no-config"
   },

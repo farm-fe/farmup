@@ -78,17 +78,9 @@ export class Executer {
     }
 
     private async terminateChild(child: ExecaChildProcess) {
-        const maxRetries = 6;
-        let retries = 0;
-
-        while (child && !child.killed && retries < maxRetries) {
+        while (child && !child.killed) {
             child.kill();
             await delay(30);
-            retries++;
-        }
-
-        if (child && !child.killed) {
-            this.logger.warn(`Child process PID ${child.pid} failed to close after ${maxRetries} attempts`);
         }
     }
 }
