@@ -5,8 +5,6 @@ export default defineConfig({
         input: {
             index: 'index.ts',
         },
-        output: {
-            
-        }
+        persistentCache: false,
     },
 });

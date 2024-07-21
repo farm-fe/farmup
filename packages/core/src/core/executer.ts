@@ -31,14 +31,15 @@ export class Executer {
     }
 
     async _execute(command: string, name: string, args: string[], logger: Logger) {
+
         if (this.child) {
             await this.closeChild();
         }
-
         const child = execaCommand([command, ...args].join(' '), {
             cwd: process.cwd(),
             stdio: 'pipe',
         });
+
 
         child.stdout?.on('data', (data) => logger.debug(trimEndLF(data.toString())));
 
@@ -49,17 +50,37 @@ export class Executer {
         process.on('beforeExit', this.closeChild);
         process.on('exit', this.closeChild);
 
-        child.on('exit', (code) => {
+        child.once('exit', (code) => {
             this.logger.info(`"${name}" PID ${child.pid} ${!code ? 'done' : `exit ${code}`}`);
             this.child = undefined;
         });
     }
 
     async closeChild() {
-        while (this.child && !this.child.killed) {
-            this.child.kill();
-            await delay(50);
+        if (!this.child) {
+            return;
         }
-        this.child = undefined;
+
+        const child = this.child;
+
+        const exitPromise = new Promise<void>((resolve) => {
+            child.once('exit', () => {
+                resolve();
+            });
+        });
+
+        try {
+            await this.terminateChild(child);
+            await exitPromise;
+        } finally {
+            this.child = undefined;
+        }
+    }
+
+    private async terminateChild(child: ExecaChildProcess) {
+        while (child && !child.killed) {
+            child.kill();
+            await delay(30);
+        }
     }
 }
