@@ -35,58 +35,60 @@ export class Executer {
         if (this.child) {
             await this.closeChild();
         }
-
         const child = execaCommand([command, ...args].join(' '), {
             cwd: process.cwd(),
             stdio: 'pipe',
         });
 
-        const onStdoutData = (data: Buffer) => logger.debug(trimEndLF(data.toString()));
-        const onStderrData = (err: Error) => logger.error(err);
 
-        child.stdout?.on('data', onStdoutData);
-        child.stderr?.on('data', onStderrData);
+        child.stdout?.on('data', (data) => logger.debug(trimEndLF(data.toString())));
+
+        child.stderr?.on('data', (err) => logger.error(err));
 
         this.child = child;
 
+        process.on('beforeExit', this.closeChild);
+        process.on('exit', this.closeChild);
 
-        const onBeforeExit = () => this.closeChild();
-        process.on('beforeExit', onBeforeExit);
-        process.on('exit', onBeforeExit);
-
-        child.on('exit', (code) => {
+        child.once('exit', (code) => {
             this.logger.info(`"${name}" PID ${child.pid} ${!code ? 'done' : `exit ${code}`}`);
             this.child = undefined;
-
-            child.stdout?.off('data', onStdoutData);
-            child.stderr?.off('data', onStderrData);
-            process.off('beforeExit', onBeforeExit);
-            process.off('exit', onBeforeExit);
         });
     }
 
     async closeChild() {
-        const maxRetries = 10;
-        let retries = 0;
-
-        while (this.child && !this.child.killed && retries < maxRetries) {
-            this.child.kill();
-            await delay(50);
-            retries++;
+        if (!this.child) {
+            return;
         }
 
-        if (this.child && !this.child.killed) {
-            this.logger.warn(`Child process PID ${this.child.pid} failed to close after ${maxRetries} attempts`);
-        }
+        const child = this.child;
 
-        await new Promise<void>((resolve) => {
-            this.child.on('exit', () => {
-                console.log('exit');
-
+        const exitPromise = new Promise<void>((resolve) => {
+            child.once('exit', () => {
                 resolve();
             });
         });
 
-        this.child = undefined;
+        try {
+            await this.terminateChild(child);
+            await exitPromise;
+        } finally {
+            this.child = undefined;
+        }
+    }
+
+    private async terminateChild(child: ExecaChildProcess) {
+        const maxRetries = 6;
+        let retries = 0;
+
+        while (child && !child.killed && retries < maxRetries) {
+            child.kill();
+            await delay(30);
+            retries++;
+        }
+
+        if (child && !child.killed) {
+            this.logger.warn(`Child process PID ${child.pid} failed to close after ${maxRetries} attempts`);
+        }
     }
 }
