@@ -24,5 +24,11 @@
     "formatter": {
       "quoteStyle": "single"
     }
+  },
+  "files": {
+    "include": [
+      "*.ts",
+      "*.json"
+    ]
   }
 }

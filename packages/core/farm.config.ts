@@ -11,6 +11,7 @@ export default defineConfig({
             targetEnv: 'node',
             format: 'esm',
         },
+        lazyCompilation: false,
         persistentCache: false,
         external: ['^@farmfe/core$'],
         minify: false,

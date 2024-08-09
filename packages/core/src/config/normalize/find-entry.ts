@@ -4,8 +4,15 @@ import path from 'node:path';
 import { ExecuteMode, type CommonOptions, type Format, type ResolvedCommonOptions } from '../../types/options';
 import { isExists } from '../../util/file';
 
-const findEntryKeyFromObject = (input: Record<string, string>) => {
-    return Object.keys(input)[0];
+const findEntryKeyFromObject = (input: Record<string, string | undefined | null>) => {
+    let entry = null;
+    for (const key in input) {
+        if (input[key]) {
+            entry = key;
+            break;
+        }
+    }
+    return entry;
 };
 
 const maybeEntryPrefix = ['src'];
@@ -97,14 +104,24 @@ function normalizeCommonEntry(entries: CommonOptions['entry']): ResolvedCommonOp
 export async function tryFindEntryFromUserConfig(logger: Logger, config: UserConfig, options: CommonOptions) {
     const entriesFromOption = normalizeCommonEntry(options.entry);
 
+    const defaultCompilationInputKeys = Object.keys(config.compilation?.input ?? {}).reduce(
+        (res, key) => Object.assign(res, { [key]: null }),
+        {} as Record<string, null | undefined | string>,
+    );
+
+    const clearDefault = (obj: Record<string, null | string | undefined>) => ({
+        ...defaultCompilationInputKeys,
+        ...obj,
+    });
+
     // cli option > config
     if (entriesFromOption) {
-        return entriesFromOption;
+        return clearDefault(entriesFromOption);
     }
 
     let findEntryKey = findEntryKeyFromObject(config.compilation?.input ?? {});
 
-    if (findEntryKey) return config.compilation?.input!;
+    if (findEntryKey) return clearDefault({ [findEntryKey]: config.compilation?.input?.[findEntryKey] });
 
     let findEntry: string | null = null;
 
@@ -116,9 +133,7 @@ export async function tryFindEntryFromUserConfig(logger: Logger, config: UserCon
     } else {
         logger.info(`automatic find and use this entry: "${findEntry}"`);
     }
-    return {
-        [findEntryKey]: findEntry,
-    };
+    return clearDefault({ [findEntryKey]: findEntry });
 }
 
 const packageModuleValueMapFormat: Record<string, Format> = {
@@ -151,19 +166,21 @@ export function pinOutputEntryFilename(options: ResolvedCommonOptions) {
 
     const executeMode = options.execute.type;
 
-
-    if(options.target?.startsWith('browser')) {
+    if (options.target?.startsWith('browser')) {
         return;
     }
 
-    if ((executeMode === ExecuteMode.Custom || executeMode === ExecuteMode.Node) && !options.noExecute) {
-        options.entry = Object.entries(options.entry).reduce((res, [key, val]) => {
-            res[`${key}.${formatMapExt[options.format ?? 'cjs']}`] = val;
-            return res;
-        }, {} as Record<string, string>);
+    if (executeMode === ExecuteMode.Node && !options.noExecute) {
+        options.entry = Object.entries(options.entry).reduce(
+            (res, [key, val]) => {
+                if (val) res[`${key}.${formatMapExt[options.format ?? 'cjs']}`] = val;
+                return res;
+            },
+            {} as Record<string, string>,
+        );
 
         options.outputEntry = {
-            name: '[entryName]'
+            name: '[entryName]',
         };
     }
 }

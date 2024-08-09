@@ -72,7 +72,7 @@ export interface CommonOptions {
 }
 
 export interface ResolvedCommonOptions {
-    entry: Record<string, string>;
+    entry: Record<string, string | null | undefined>;
     args: string[];
     execute: ExecuteOption;
     external: [];
