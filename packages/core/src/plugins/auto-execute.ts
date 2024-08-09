@@ -57,7 +57,7 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
 
     return {
         name: `${name}:execute`,
-        priority: Number.NEGATIVE_INFINITY,
+        priority: Number.MIN_SAFE_INTEGER,
         async config(config) {
             return await normalizeOption.config(config);
         },

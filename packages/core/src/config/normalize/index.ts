@@ -55,7 +55,7 @@ function normalizedExecuted(commonOption: CommonOptions, options: ResolvedCommon
         }
     } else {
         // from entry file ext
-        const entryFiles = Object.values(options.entry);
+        const entryFiles = Object.values(options.entry).filter(Boolean) as string[];
         let res: ExecuteMode | undefined;
         for (const item of entryFiles) {
             const targetFromExt = extensionMapExecutedMode[path.extname(item).slice(1)];
@@ -128,7 +128,8 @@ export function normalizedTargetEnv(
     } else {
         let targetFromInput: TargetEnv | undefined;
 
-        for (const entryFile of Object.values(options.entry)) {
+        const entryFiles = Object.values(options.entry).filter(Boolean) as string[];
+        for (const entryFile of entryFiles) {
             const ext = path.extname(entryFile).slice(1);
             if (extMapTargetEnv[ext]) {
                 targetFromInput = extMapTargetEnv[ext];
