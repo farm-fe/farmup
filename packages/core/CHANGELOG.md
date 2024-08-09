@@ -1,5 +1,11 @@
 # farmup
 
+## 0.1.1
+
+### Patch Changes
+
+- 4bf2b20: fix custom input & upgrade @farm/core
+
 ## 0.1.0
 
 ### Minor Changes
