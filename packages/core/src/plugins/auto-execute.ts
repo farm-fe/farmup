@@ -1,10 +1,12 @@
 import { Logger, type JsPlugin } from '@farmfe/core';
 import path from 'node:path';
-import type { CommonOptions } from '../types/options';
+import { ExecuteMode, type CommonOptions } from '../types/options';
 import { NormalizeOption } from '../config/normalize';
 import { CLI_NAME, logger as defaultLogger } from '../config/constant';
 import { Executer } from '../core/executer';
 import { ProxyCompiler } from '../core/proxyCompiler';
+import { IpcServer } from '../core/ipc/server';
+import type { ResourceData } from '../node/esm/interface';
 
 export { NormalizeOption, Executer };
 
@@ -16,8 +18,9 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
     const normalizeOption = new NormalizeOption(options, logger);
 
     const proxyCompiler = new ProxyCompiler();
+    let ipcServer: IpcServer<ResourceData, unknown> | null = null;
 
-    proxyCompiler.onWriteResourcesToDisk(() => {
+    proxyCompiler.onWriteResourcesToDisk(async () => {
         if (normalizeOption.options.noExecute) {
             return;
         }
@@ -46,6 +49,50 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
 
         const nameWithoutExt = path.parse(resourceOutputEntry).name;
 
+        if (
+            normalizeOption.options.execute.type === ExecuteMode.Node &&
+            normalizeOption.options.format === 'esm' &&
+            options.experienceEsm
+        ) {
+            if (!ipcServer) {
+                ipcServer = new IpcServer<ResourceData, unknown>();
+                await ipcServer.start();
+            }
+
+            if (ipcServer) {
+                ipcServer.onConnection((service) => {
+                    service.send({
+                        entry: resourceOutputEntry,
+                        name: '',
+                        outputDir: outputDir ?? './dist',
+                        resources: Object.entries(proxyCompiler.resources() ?? {}).reduce(
+                            (result, [key, value]) => {
+                                result[key] = value.toString('utf-8');
+                                return result;
+                            },
+                            {} as Record<string, string>,
+                        ),
+                        root: options.root!,
+                    });
+                });
+            }
+
+            executer.execute(
+                // mock path, after replace as entry
+                path.join(options.root!, options.outputDir ?? './dist', resourceOutputEntry),
+                nameWithoutExt,
+                new Logger({
+                    name: `${name}:${nameWithoutExt}`,
+                }),
+                {
+                    env: {
+                        FARM_ESM_RESOURCE_MOCK_PORT: ipcServer?.socket_path,
+                    },
+                },
+            );
+            return;
+        }
+
         executer.execute(
             executePath,
             nameWithoutExt,
@@ -73,6 +120,15 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
         configureCompiler(c) {
             proxyCompiler.start(c);
 
+            if (
+                !normalizeOption.options.noExecute &&
+                normalizeOption.options.execute.type === ExecuteMode.Node &&
+                normalizeOption.options.format === 'esm' &&
+                options.experienceEsm
+            ) {
+                proxyCompiler.disableEmit();
+            }
+
             if (!c.config.config?.watch) {
                 return;
             }
@@ -81,14 +137,14 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
                 return;
             }
 
-            const entries = Object.values(c.config.config?.input ?? {});
+            const entries = Object.values(c.config.config?.input ?? {}).filter(Boolean);
 
             if (entries.length === 0) {
                 return;
             }
 
             for (const entry of entries) {
-                c.addExtraWatchFile(entry, normalizeOption.options.watchFiles);
+                c.addExtraWatchFile(entry!, normalizeOption.options.watchFiles);
             }
         },
     };

@@ -39,14 +39,13 @@ function createInlineConfig(options: CommonOptions): InlineConfig {
         root: options.root,
         configPath: options.config,
         plugins: buildPluginsByCommonOption(options),
-        logger: logger,
+        logger: new NoopLogger(),
     };
 }
 
 async function autoStart(options: CommonOptions) {
     const preNormalizeOption = await NormalizeOption.fromCommonOption(options, new NoopLogger());
     const inlineConfig = createInlineConfig(options);
-    // console.log(preNormalizeOption.options);
     switch (preNormalizeOption.options.execute.type) {
         case ExecuteMode.Browser:
             return farmStart(inlineConfig);
@@ -89,13 +88,14 @@ cli.option('-w, --watch [...files]', 'watch files', { default: false })
     .option('--external [...external]', 'external')
     .option('--no-auto-external', 'if not found module, auto as external', { default: true })
     .option('--sourcemap [sourcemap]', 'generate sourcemap or not')
+    .option('--no-experience-esm', 'disable using experience esm execute', { default: true })
     .option(
         '--target [target]',
         "target for output, default is node, support 'browser'、'node'、'node16'、'node-legacy'、'node-next'、'browser-legacy'、'browser-es2015'、'browser-es2017'、'browser-esnext'",
     );
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-async function commonOptionsFromArgs(args: Record<string, any>): Promise<Partial<CommonOptions>> {
+async function commonOptionsFromArgs(args: Record<string, any>): Promise<CommonOptions> {
     const root = process.cwd();
     const configPath =
         typeof args.config === 'string'
@@ -126,6 +126,7 @@ async function commonOptionsFromArgs(args: Record<string, any>): Promise<Partial
             .filter(Boolean),
         outputDir: args.output || './dist',
         sourcemap: args.sourcemap === 'false' ? false : args.sourcemap === 'true' ? true : args.sourcemap,
+        experienceEsm: args.experienceEsm ?? false,
     };
 }
 

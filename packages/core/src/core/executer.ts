@@ -1,4 +1,4 @@
-import { type ExecaChildProcess, execaCommand } from 'execa';
+import { type ExecaChildProcess, execaCommand, type Options } from 'execa';
 import { ExecuteMode, type ExecuteOption, type ResolvedCommonOptions } from '../types/options';
 import type { Logger } from '@farmfe/core';
 import { delay } from '../util/async';
@@ -11,31 +11,31 @@ export class Executer {
         public option: ExecuteOption,
         public logger: Logger,
         public normalizedOption: ResolvedCommonOptions,
-    ) { }
+    ) {}
 
-    execute(path: string, name: string, logger = this.logger) {
+    execute(path: string, name: string, logger = this.logger, options: Options = {}) {
         switch (this.option.type) {
             case ExecuteMode.Browser: {
                 // console.log('TODO: use open command');
                 break;
             }
             case ExecuteMode.Node: {
-                this._execute('node', name, [path, ...this.option.args], logger);
+                this._execute('node', name, [...this.option.args, path], logger, options);
                 break;
             }
             case ExecuteMode.Custom: {
-                this._execute(this.option.command, name, [path, ...this.option.args], logger);
+                this._execute(this.option.command, name, [...this.option.args, path], logger, options);
                 break;
             }
         }
     }
 
-    async _execute(command: string, name: string, args: string[], logger: Logger) {
-
+    async _execute(command: string, name: string, args: string[], logger: Logger, options: Options = {}) {
         if (this.child) {
             await this.closeChild();
         }
         const child = execaCommand([command, ...args].join(' '), {
+            ...options,
             cwd: process.cwd(),
             stdio: 'pipe',
         });

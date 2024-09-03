@@ -69,6 +69,9 @@ export interface CommonOptions {
      * @params boolean | 'inline' | 'all' | 'all-inline'
      */
     sourcemap?: SourceMap;
+
+    /** disable using experience esm execute */
+    experienceEsm?: boolean
 }
 
 export interface ResolvedCommonOptions {

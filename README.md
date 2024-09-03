@@ -121,6 +121,12 @@ in your code, if not find `package` or `source`, set external
 ### sourcemap
 
 - `default`: `undefined`
-- option:  `boolean` | `'inline'` | `'all'` | `'all-inline'`
+- option: `boolean` | `'inline'` | `'all'` | `'all-inline'`
 
 generate sourcemap
+
+### no-experience-esm
+
+- option: `boolean`
+
+disable exec esm without output to filesystem
