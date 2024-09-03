@@ -1,5 +1,11 @@
 # farmup
 
+## 0.1.2
+
+### Patch Changes
+
+- f591344: upgrade @farmfe/core version and add exec script without output
+
 ## 0.1.1
 
 ### Patch Changes
