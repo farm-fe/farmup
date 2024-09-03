@@ -1,6 +1,6 @@
 import type { Compiler } from '@farmfe/core';
 import EventEmitter from 'node:events';
-import { proxyCompilerFn } from './util';
+import { proxyCompilerFn, defineProperty } from './util';
 import type { FnContext, OmitFnReturn } from './interface';
 
 export class ProxyCompiler {
@@ -10,6 +10,7 @@ export class ProxyCompiler {
 
     private _preProxyFnList: (keyof Compiler)[] = [];
     private alreadyProxyFnList: Set<keyof Compiler> = new Set();
+    isDisableEmit = false;
 
     start(compiler: Compiler) {
         const isRestart = !!this.compiler;
@@ -32,13 +33,13 @@ export class ProxyCompiler {
         }
     }
 
-    private proxyCompiler<K extends keyof Compiler>(fnName: K) {
+    private proxyCompiler<K extends keyof Compiler>(fnName: K, force = false) {
         if (!this.compiler) {
             this._preProxyFnList.push(fnName);
             return;
         }
 
-        if (this.alreadyProxyFnList.has(fnName)) {
+        if (!force && this.alreadyProxyFnList.has(fnName)) {
             return;
         }
 
@@ -46,6 +47,12 @@ export class ProxyCompiler {
 
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         proxyCompilerFn(this.compiler, fnName, (...args: any[]) => this.event.emit(fnName, ...args));
+    }
+
+    private replaceCompiler<K extends keyof Compiler>(fnName: K, fn: Compiler[K]) {
+        defineProperty(this.compiler, fnName, fn);
+        // re proxy the compiler
+        this.proxyCompiler(fnName, true);
     }
 
     private on<
@@ -66,5 +73,16 @@ export class ProxyCompiler {
 
     onWriteResourcesToDisk(handler: OmitFnReturn<Compiler['writeResourcesToDisk']>) {
         return this.on('writeResourcesToDisk', (r) => handler(...r.args));
+    }
+
+    disableEmit() {
+        if (this.isDisableEmit) return;
+        const handler = () => Promise.resolve();
+        this.replaceCompiler('writeResourcesToDisk', handler);
+        this.isDisableEmit = true;
+    }
+
+    resources() {
+        return this.compiler.resources();
     }
 }

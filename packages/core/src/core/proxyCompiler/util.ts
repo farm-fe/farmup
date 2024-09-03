@@ -5,8 +5,10 @@ export function defineProperty<O, K extends keyof O, V extends O[K]>(obj: O, key
 
     const descriptor = Object.getOwnPropertyDescriptor(obj, key);
     Object.defineProperty(obj, key, {
+        writable: true,
+        enumerable: true,
+        configurable: true,
         value,
-        ...descriptor,
     });
 
     return origin as V;
@@ -21,7 +23,7 @@ export function proxyCompilerFn<
     },
     K extends keyof OFT = keyof OFT,
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    F extends (...args: any) => any = OFT[K]
+    F extends (...args: any) => any = OFT[K],
 >(compiler: T, fnName: K, callback: F) {
     const handler = ((...args: Parameters<OFT[K]>) => {
         const r = origin.bind(compiler)(...args);

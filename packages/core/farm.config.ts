@@ -6,10 +6,16 @@ export default defineConfig({
         input: {
             index: 'src/index.ts',
             plugin: 'src/plugin-entry.ts',
+            import_register: './src/node/esm/register.ts',
+            import_hooks: './src/node/esm/hooks.ts',
         },
         output: {
             targetEnv: 'node',
             format: 'esm',
+        },
+        script: {
+            nativeTopLevelAwait: true,
+            plugins: [],
         },
         lazyCompilation: false,
         persistentCache: false,

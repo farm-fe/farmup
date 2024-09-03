@@ -74,6 +74,14 @@ function normalizedExecuted(commonOption: CommonOptions, options: ResolvedCommon
             args: commonOption.args ?? [],
         } as NodeExecuteOption;
     }
+
+    const execute = options.execute;
+
+    if (execute.type === ExecuteMode.Node && commonOption.experienceEsm) {
+        if (options.format === 'esm' && !execute.args.includes('--import')) {
+            execute.args.push('--import', path.join(import.meta.dirname, './import_register.js'));
+        }
+    }
 }
 
 async function normalizedFormat(config: UserConfig, commonOptions: CommonOptions, options: ResolvedCommonOptions) {
@@ -248,7 +256,7 @@ export class NormalizeOption {
 
     async config(config: UserConfig): Promise<UserConfig> {
         await normalizedSimpleConfig(config, this.commonOption, this.options, this.logger);
-        return withServerOrWatch(
+        const c = withServerOrWatch(
             {
                 compilation: {
                     input: this.options.entry,
@@ -263,6 +271,8 @@ export class NormalizeOption {
             },
             this.options,
         );
+
+        return c;
     }
 
     async normalizeByCommonOption() {
