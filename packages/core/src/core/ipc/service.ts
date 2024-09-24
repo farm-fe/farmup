@@ -5,11 +5,18 @@ export class Service<S, R> {
 
     constructor(private _socket: Socket) {}
 
-    send(data: S) {
+    send(data: S): Promise<void> {
         if (this._socket.closed) {
-            return;
+            return Promise.resolve();
         }
-        this._socket.write(JSON.stringify(data));
+
+        return new Promise((resolve) => {
+            this._socket.end(JSON.stringify(data), () => {
+                resolve();
+            });
+
+            this._socket.on('end', () => resolve());
+        });
     }
 
     onMessage(callback: (data: R) => void) {
