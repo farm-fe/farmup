@@ -57,6 +57,9 @@ export class IpcServer<S, R> {
 
     close() {
         this._server.close();
+        for (const socket of this.sockets) {
+            socket.close();
+        }
         this.sockets.clear();
     }
 

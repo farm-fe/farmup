@@ -57,8 +57,13 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
             }
 
             if (ipcServer) {
-                ipcServer.onConnection((service) => {
-                    service.send({
+                ipcServer.onConnection(async (service) => {
+                    service.onClose(() => {
+                        ipcServer?.close();
+                        ipcServer = null;
+                    });
+
+                    await service.send({
                         entry: resourceOutputEntry,
                         name: '',
                         outputDir: outputDir ?? './dist',
@@ -70,11 +75,6 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
                             {} as Record<string, string>,
                         ),
                         root: options.root!,
-                    });
-
-                    service.onClose(() => {
-                        ipcServer?.close();
-                        ipcServer = null;
                     });
                 });
             }

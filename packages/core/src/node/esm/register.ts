@@ -19,6 +19,7 @@ async function run() {
         ipc.onMessage((data) => {
             lastMessage = data;
             resolve(undefined);
+            ipc.close();
         });
     });
 }

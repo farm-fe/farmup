@@ -9,15 +9,26 @@ export class IpcClient<S, R> {
     start(socketPath: string) {
         const client = net.createConnection(socketPath);
 
-        client.on('data', (data) => {
-            this.events.emit('data', data);
+        let data = Buffer.alloc(0);
+
+        client.on('end', () => {
+            this.events.emit('data', data.toString('utf-8'));
+            data = Buffer.alloc(0);
+        });
+
+        client.on('data', (buffer) => {
+            data = Buffer.concat([new Uint8Array(data), new Uint8Array(buffer)], data.byteLength + buffer.byteLength);
         });
 
         this.client = client;
     }
 
-    send(data: S) {
-        this.client.write(JSON.stringify(data));
+    async send(data: S) {
+        return new Promise<void>((resolve) => {
+            this.client.end(JSON.stringify(data), () => {
+                resolve();
+            });
+        });
     }
 
     onMessage(callback: (data: R) => void) {
