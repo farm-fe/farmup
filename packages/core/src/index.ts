@@ -34,18 +34,19 @@ function buildPluginsByCommonOption(options: CommonOptions): JsPlugin[] {
 
 type InlineConfig = FarmCLIOptions & UserConfig;
 
-function createInlineConfig(options: CommonOptions): InlineConfig {
+function createInlineConfig(options: CommonOptions, disableFarmLogger = true): InlineConfig {
+    const log = disableFarmLogger ? new NoopLogger() : logger;
     return {
         root: options.root,
         configPath: options.config,
         plugins: buildPluginsByCommonOption(options),
-        logger: new NoopLogger(),
+        logger: log,
     };
 }
 
 async function autoStart(options: CommonOptions) {
     const preNormalizeOption = await NormalizeOption.fromCommonOption(options, new NoopLogger());
-    const inlineConfig = createInlineConfig(options);
+    const inlineConfig = createInlineConfig(options, preNormalizeOption.options.execute.type !== ExecuteMode.Browser);
     switch (preNormalizeOption.options.execute.type) {
         case ExecuteMode.Browser:
             return farmStart(inlineConfig);
@@ -88,7 +89,7 @@ cli.option('-w, --watch [...files]', 'watch files', { default: false })
     .option('--external [...external]', 'external')
     .option('--no-auto-external', 'if not found module, auto as external', { default: true })
     .option('--sourcemap [sourcemap]', 'generate sourcemap or not')
-    .option('--no-experience-esm', 'disable using experience esm execute', { default: true })
+    .option('--no-experience-script', 'disable using experience esm execute', { default: true })
     .option(
         '--target [target]',
         "target for output, default is node, support 'browser'、'node'、'node16'、'node-legacy'、'node-next'、'browser-legacy'、'browser-es2015'、'browser-es2017'、'browser-esnext'",
@@ -126,7 +127,7 @@ async function commonOptionsFromArgs(args: Record<string, any>): Promise<CommonO
             .filter(Boolean),
         outputDir: args.output || './dist',
         sourcemap: args.sourcemap === 'false' ? false : args.sourcemap === 'true' ? true : args.sourcemap,
-        experienceEsm: args.experienceEsm ?? false,
+        experienceScript: args.experienceScript ?? false,
     };
 }
 
@@ -145,6 +146,7 @@ cli.command('build [entry]', 'start watch for node or custom command')
             ...(await commonOptionsFromArgs(options)),
         });
     });
+
 cli.command('start [entry]', 'start server for html file').action(async (entry, options) => {
     start({
         entry: Array.isArray(entry) ? entry : [entry].filter(Boolean),

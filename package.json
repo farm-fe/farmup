@@ -5,6 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "initial": "pnpm --filter './packages/core' run build",
     "dev": "pnpm --filter './packages/core' run dev",
     "release": "pnpm --filter './packages/*' run build && changeset publish",
     "ready": "farmup ./scripts/ready.ts -o ./dist/ready --no-config"
@@ -20,8 +21,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.7.3",
+    "@changesets/cli": "^2.27.3",
     "cspell": "^8.8.3",
-    "execa": "^8.0.1",
-    "@changesets/cli": "^2.27.3"
+    "execa": "^8.0.1"
   }
 }

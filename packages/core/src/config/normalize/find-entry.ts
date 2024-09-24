@@ -161,7 +161,7 @@ const formatMapExt: Record<Exclude<Format, undefined>, string> = {
     esm: 'mjs',
 };
 
-export function pinOutputEntryFilename(options: ResolvedCommonOptions) {
+export function pinOutputEntryFilename(options: ResolvedCommonOptions, config: UserConfig) {
     if (options.noExecute) return;
 
     const executeMode = options.execute.type;
@@ -171,12 +171,16 @@ export function pinOutputEntryFilename(options: ResolvedCommonOptions) {
     }
 
     if (executeMode === ExecuteMode.Node && !options.noExecute) {
+        const originInput = config.compilation?.input ?? {};
         options.entry = Object.entries(options.entry).reduce(
             (res, [key, val]) => {
-                if (val) res[`${key}.${formatMapExt[options.format ?? 'cjs']}`] = val;
+                if (val) {
+                    if (originInput[key]) res[key] = undefined;
+                    res[`${key}.${formatMapExt[options.format ?? 'cjs']}`] = val;
+                }
                 return res;
             },
-            {} as Record<string, string>,
+            {} as Record<string, string | undefined | null>,
         );
 
         options.outputEntry = {

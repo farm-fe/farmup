@@ -71,7 +71,7 @@ export interface CommonOptions {
     sourcemap?: SourceMap;
 
     /** disable using experience esm execute */
-    experienceEsm?: boolean
+    experienceScript?: boolean
 }
 
 export interface ResolvedCommonOptions {

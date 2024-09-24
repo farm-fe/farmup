@@ -25,4 +25,8 @@ export class IpcClient<S, R> {
             callback(JSON.parse(data.toString()));
         });
     }
+
+    close() {
+        this.client.end();
+    }
 }

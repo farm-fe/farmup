@@ -77,9 +77,12 @@ function normalizedExecuted(commonOption: CommonOptions, options: ResolvedCommon
 
     const execute = options.execute;
 
-    if (execute.type === ExecuteMode.Node && commonOption.experienceEsm) {
+    if (execute.type === ExecuteMode.Node && commonOption.experienceScript) {
         if (options.format === 'esm' && !execute.args.includes('--import')) {
             execute.args.push('--import', path.join(import.meta.dirname, './import_register.js'));
+        } else if (options.format === 'cjs' && !execute.args.includes('--experimental-vm-modules')) {
+            // support dynamic import in vm
+            execute.args.push('--experimental-vm-modules');
         }
     }
 }
@@ -125,7 +128,6 @@ export function normalizedTargetEnv(
     options: ResolvedCommonOptions,
     logger: Logger,
 ) {
-    config.compilation?.output?.targetEnv;
     if (commonOptions.target) {
         if (!invalidTargetEnv.includes(commonOptions.target)) {
             logger.error(`target ${commonOptions.target}  is invalid`);
@@ -176,7 +178,6 @@ async function normalizedSimpleConfig(
     logger: Logger,
 ) {
     const inputs = await tryFindEntryFromUserConfig(logger, config, commonOptions);
-
     options.entry = inputs;
 
     config.compilation ??= {};
@@ -207,7 +208,7 @@ async function normalizedSimpleConfig(
 
     normalizedExecuted(commonOptions, options);
 
-    pinOutputEntryFilename(options);
+    pinOutputEntryFilename(options, config);
 }
 
 function withServerOrWatch(userConfig: UserConfig, resolvedOption: ResolvedCommonOptions): UserConfig {
@@ -266,6 +267,9 @@ export class NormalizeOption {
                         ...(this.options.outputEntry ? { entryFilename: this.options.outputEntry.name } : {}),
                         path: this.options.outputDir,
                     },
+                    // TODO: fix in script mode, resources are now only synchronized once at startup
+                    // and lazyCompilation cannot obtain the latest resources in a timely manner.
+                    ...(this.options.execute.type === ExecuteMode.Node ? { lazyCompilation: true } : {}),
                     ...pick(this.options, 'minify', 'sourcemap', 'external'),
                 },
             },

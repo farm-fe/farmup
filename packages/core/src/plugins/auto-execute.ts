@@ -7,6 +7,7 @@ import { Executer } from '../core/executer';
 import { ProxyCompiler } from '../core/proxyCompiler';
 import { IpcServer } from '../core/ipc/server';
 import type { ResourceData } from '../node/esm/interface';
+import { fileURLToPath } from 'node:url';
 
 export { NormalizeOption, Executer };
 
@@ -49,11 +50,7 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
 
         const nameWithoutExt = path.parse(resourceOutputEntry).name;
 
-        if (
-            normalizeOption.options.execute.type === ExecuteMode.Node &&
-            normalizeOption.options.format === 'esm' &&
-            options.experienceEsm
-        ) {
+        if (normalizeOption.options.execute.type === ExecuteMode.Node && options.experienceScript) {
             if (!ipcServer) {
                 ipcServer = new IpcServer<ResourceData, unknown>();
                 await ipcServer.start();
@@ -74,12 +71,25 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
                         ),
                         root: options.root!,
                     });
+
+                    service.onClose(() => {
+                        ipcServer?.close();
+                        ipcServer = null;
+                    });
                 });
             }
 
-            executer.execute(
+            const getExecutePath = (): string => {
+                if (normalizeOption.options.format === 'cjs') {
+                    return path.join(fileURLToPath(path.dirname(import.meta.url)), './vm.cjs');
+                }
+
                 // mock path, after replace as entry
-                path.join(options.root!, options.outputDir ?? './dist', resourceOutputEntry),
+                return path.join(options.root!, options.outputDir ?? './dist', resourceOutputEntry);
+            };
+
+            executer.execute(
+                getExecutePath(),
                 nameWithoutExt,
                 new Logger({
                     name: `${name}:${nameWithoutExt}`,
@@ -90,6 +100,7 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
                     },
                 },
             );
+
             return;
         }
 
@@ -123,8 +134,7 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
             if (
                 !normalizeOption.options.noExecute &&
                 normalizeOption.options.execute.type === ExecuteMode.Node &&
-                normalizeOption.options.format === 'esm' &&
-                options.experienceEsm
+                options.experienceScript
             ) {
                 proxyCompiler.disableEmit();
             }
