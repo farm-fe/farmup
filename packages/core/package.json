@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "farm watch & farm watch --config farm.config.cjs.ts",
-    "build": "farm build",
+    "build": "rimraf ./dist && farm build && farm build --config farm.config.cjs.ts",
     "preview": "farm preview",
     "clean": "farm clean",
     "farmup": "node ./bin/farmup.js --no-exec -w",

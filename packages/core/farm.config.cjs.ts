@@ -10,6 +10,7 @@ export default defineConfig({
             targetEnv: 'node',
             format: 'cjs',
             entryFilename: '[entryName].cjs',
+            clean: false,
         },
         lazyCompilation: false,
         persistentCache: false,
