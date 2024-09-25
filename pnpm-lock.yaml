@@ -40,14 +40,14 @@ importers:
   packages/core:
     dependencies:
       '@farmfe/core':
-        specifier: 'catalog:'
+        specifier: ^1.3.22
         version: 1.3.22
       tmp:
         specifier: ^0.2.3
         version: 0.2.3
     devDependencies:
       '@farmfe/cli':
-        specifier: 'catalog:'
+        specifier: ^1.0.4
         version: 1.0.4
       '@types/fs-extra':
         specifier: ^11.0.4
