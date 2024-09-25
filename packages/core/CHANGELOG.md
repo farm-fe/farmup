@@ -1,5 +1,11 @@
 # farmup
 
+## 0.1.4
+
+### Patch Changes
+
+- 31b27ee: fix pnpm catalog version
+
 ## 0.1.3
 
 ### Patch Changes
