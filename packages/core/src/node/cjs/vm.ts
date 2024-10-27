@@ -37,7 +37,6 @@ function createVmContextByModule(newM: Module) {
             __dirname: path.dirname(newM.filename),
             module: newM,
             exports: newM.exports,
-            ___result: undefined,
         },
         {},
     );
