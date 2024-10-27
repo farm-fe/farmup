@@ -64,7 +64,7 @@
     "email": "sshuang141@163.com"
   },
   "dependencies": {
-    "@farmfe/core": "^1.3.22",
+    "@farmfe/core": "^1.3.29",
     "tmp": "^0.2.3"
   }
 }
