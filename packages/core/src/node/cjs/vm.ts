@@ -25,7 +25,6 @@ ipc.onMessage((data) => {
     }
 
     start();
-
     ipc.close();
 });
 
@@ -34,9 +33,11 @@ ipc.start(FARM_ESM_RESOURCE_MOCK_PORT!);
 function createVmContextByModule(newM: Module) {
     return vm.createContext(
         {
-            __farm__filename: newM.filename,
-            __farm__dirname: path.dirname(newM.filename),
-            __farm_m: newM,
+            __filename: newM.filename,
+            __dirname: path.dirname(newM.filename),
+            module: newM,
+            exports: newM.exports,
+            ___result: undefined,
         },
         {},
     );
@@ -105,13 +106,13 @@ function createContext(_ctx: vm.Context, require: NodeRequire) {
 }
 
 function executeCode(code: string, ctx: ModuleContext) {
-    vm.runInNewContext(
-        `
-        (function(exports, require, module, __filename, __dirname) {
-        ${code}
-})(__farm_m.exports, require, __farm_m, __farm__filename, __farm__dirname);`.trim(),
-        ctx.context,
-        {
+    ctx.context.eval = (code: string) => {
+        return executeCode(code, ctx);
+    };
+
+    try {
+        return vm.runInNewContext(`${code}`.trim(), ctx.context, {
+            filename: ctx.filename,
             // @ts-ignore
             async importModuleDynamically(specifier, script, importAttributes) {
                 let exports: Record<string, unknown> | undefined;
@@ -143,8 +144,10 @@ function executeCode(code: string, ctx: ModuleContext) {
                     return m;
                 }
             },
-        },
-    );
+        });
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 function nativeModuleCache(m: Module, r: NodeRequire, importer?: string) {

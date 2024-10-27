@@ -10,8 +10,8 @@ class Register {
 
     resource(url: string) {
         const absolutePath = path.join(this.resources.root, this.resources.outputDir);
-
         const relativePath = url.startsWith('file://') ? path.relative(absolutePath, fileURLToPath(url)) : url;
+
         return this.resources?.resources[relativePath];
     }
 

@@ -35,7 +35,7 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
             return;
         }
 
-        const resourceOutputEntry = Object.keys(normalizeOption.options.entry)[0];
+        const resourceOutputEntry = Object.entries(normalizeOption.options.entry).filter((item) => item[1])[0]?.[0];
 
         if (!resourceOutputEntry) {
             logger.error('output entry is not found');
@@ -48,7 +48,7 @@ export default function autoExecute(options: CommonOptions = {}, logger = defaul
             executer = new Executer(normalizeOption.options.execute, logger, normalizeOption.options);
         }
 
-        const nameWithoutExt = path.parse(resourceOutputEntry).name;
+        const nameWithoutExt = path.parse(resourceOutputEntry).base;
 
         if (normalizeOption.options.execute.type === ExecuteMode.Node && options.experienceScript) {
             if (!ipcServer) {

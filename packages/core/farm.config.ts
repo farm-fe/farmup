@@ -12,6 +12,7 @@ export default defineConfig({
         output: {
             targetEnv: 'node',
             format: 'esm',
+            clean: true,
         },
         script: {
             nativeTopLevelAwait: true,
