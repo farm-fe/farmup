@@ -1,5 +1,11 @@
 # farmup
 
+## 0.1.6
+
+### Patch Changes
+
+- 622405e: fix named socket path on windows
+
 ## 0.1.5
 
 ### Patch Changes
