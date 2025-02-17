@@ -3,6 +3,7 @@ import net from 'node:net';
 import { Service } from './service';
 import EventEmitter from 'node:events';
 import path from 'node:path';
+import { isWin } from '../../util/platform';
 
 interface TempFileResult {
     path: string;
@@ -30,6 +31,10 @@ export class IpcServer<S, R> {
         const tempFile = await createTempFile();
         this.socket_path = tempFile.path;
 
+        if (isWin) {
+            this.socket_path = path.join('\\\\.\\pipe\\', this.socket_path);
+        }
+
         const server = net.createServer((socket) => {
             const service = new Service<S, R>(socket);
             socket.on('close', () => {
@@ -39,7 +44,7 @@ export class IpcServer<S, R> {
             this.events.emit('connection', service);
         });
 
-        server.listen(tempFile);
+        server.listen(this.socket_path);
 
         this._server = server;
     }
