@@ -5,9 +5,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "initial": "pnpm --filter './packages/core' run build",
-    "dev": "pnpm --filter './packages/core' run dev",
-    "release": "pnpm --filter './packages/*' run build && changeset publish",
+    "initial": "pnpm --filter \"./packages/core\" run build",
+    "dev": "pnpm --filter \"./packages/core\" run dev",
+    "release": "pnpm --filter \"./packages/**\" run build && changeset publish",
     "ready": "farmup ./scripts/ready.ts -o ./dist/ready --no-config"
   },
   "author": {
