@@ -8,9 +8,10 @@ import {
 } from '../../types/options';
 import { pinOutputEntryFilename, tryFindEntryFromUserConfig, tryFindFormatFromPackage } from './find-entry';
 import { isObject, isUndefined, merge, pick } from 'lodash-es';
-import path from 'node:path';
+import path, { dirname } from 'node:path';
 import { isExists } from '../../util/file';
 import { glob } from 'glob';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 function normalizedMinify(config: UserConfig, commonOptions: CommonOptions, options: ResolvedCommonOptions) {
     if (!isUndefined(commonOptions.minify)) {
@@ -79,7 +80,10 @@ function normalizedExecuted(commonOption: CommonOptions, options: ResolvedCommon
 
     if (execute.type === ExecuteMode.Node && commonOption.experienceScript) {
         if (options.format === 'esm' && !execute.args.includes('--import')) {
-            execute.args.push('--import', path.join(import.meta.dirname, './import_register.js'));
+            const __filename = fileURLToPath(import.meta.url);
+            const __dirname = dirname(__filename);
+            const import_registerPath = pathToFileURL(path.join(__dirname, './import_register.js')).href;
+            execute.args.push('--import', import_registerPath);
         } else if (options.format === 'cjs' && !execute.args.includes('--experimental-vm-modules')) {
             // support dynamic import in vm
             execute.args.push('--experimental-vm-modules');
